@@ -273,7 +273,27 @@ input, select, button{ padding:8px; }
 </div>
 
 <script>
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCi6dG07IJy19V-lP94wp8rcmAWhMqaJk",
+    authDomain: "gswdashboard.firebaseapp.com",
+    projectId: "gswdashboard",
+    storageBucket: "gswdashboard.firebasestorage.app",
+    messagingSenderId: "780004848260",
+    appId: "1:780004848260:web:098096a1892ffb26e688d1",
+    measurementId: "G-HGN81N3RYS"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
 /* ===== LIVE IST CLOCK ===== */
 function updateISTClock(){
     const now = new Date().toLocaleString("en-IN",{
@@ -704,6 +724,7 @@ render();
 </body>
 
 </html>
+
 
 
 
