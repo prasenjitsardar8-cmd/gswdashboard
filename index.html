@@ -125,7 +125,9 @@ input, select, button{ padding:8px; }
 .flip-card.flipped .flip-inner{
     transform:rotateY(180deg);
 }
-
+.flip-inner{
+    will-change: transform;
+}
 .flip-front, .flip-back{
     position:absolute;
     width:100%;
@@ -707,6 +709,7 @@ render();
 </body>
 
 </html>
+
 
 
 
