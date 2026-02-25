@@ -291,6 +291,21 @@ const db = firebase.database();
 
 <script>
 
+/* ===== FIREBASE REALTIME SYNC ===== */
+
+let presentEngineers = [];
+let cases = [];
+
+db.ref("presentEngineers").on("value", (snapshot) => {
+    presentEngineers = snapshot.val() || [];
+    render();
+});
+
+db.ref("cases").on("value", (snapshot) => {
+    cases = snapshot.val() || [];
+    render();
+});
+
 /* ===== LIVE IST CLOCK ===== */
 function updateISTClock(){
     const now = new Date().toLocaleString("en-IN",{
@@ -665,7 +680,7 @@ function resetPresentEngineers(){
 
     alert("Present Engineers list has been reset.");
 }
-render();
+
 </script>
 </body>
 
