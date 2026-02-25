@@ -573,7 +573,7 @@ function render(){
         if(e.name===nextEngineer) cardClass+=" next";
 
         dashboard.innerHTML+=`
-        <div class="flip-card ${cardClass}" onclick="toggleFlip(this)">
+        <div class="flip-card ${cardClass}">
             <div class="flip-inner">
                 <div class="flip-front">
                     ${hasSev1 && isPresent?'<div class="badge">SEV-1 ACTIVE</div>':''}
@@ -709,6 +709,7 @@ render();
 </body>
 
 </html>
+
 
 
 
