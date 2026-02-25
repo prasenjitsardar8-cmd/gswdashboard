@@ -38,6 +38,29 @@ body { font-family: Arial; margin:0; background:#f4f6f9; display:flex; }
     font-size:12px;
 }
 
+/* ===== RECOMMENDED OPTION GLOW ===== */
+
+@keyframes glowPulse {
+    0% {
+        background-color: #e8f5e9;
+        box-shadow: 0 0 5px #00c853;
+    }
+    50% {
+        background-color: #c8f7c5;
+        box-shadow: 0 0 12px #00c853;
+    }
+    100% {
+        background-color: #e8f5e9;
+        box-shadow: 0 0 5px #00c853;
+    }
+}
+
+.recommended-option {
+    font-weight: bold;
+    color: #00695c;
+    animation: glowPulse 1.8s infinite ease-in-out;
+}
+
 /* ===== MAIN ===== */
 .main{ flex:1; padding:20px; }
 
@@ -414,11 +437,11 @@ function populateDropdowns(){
 
     // ===== Add Recommended Engineer FIRST =====
     if(nextEngineer){
-        assignDD.innerHTML += `
-            <option value="${nextEngineer}" selected>
-                ${nextEngineer} ⭐ (Recommended)
-            </option>
-        `;
+assignDD.innerHTML += `
+    <option value="${nextEngineer}" selected class="recommended-option">
+        ${nextEngineer} ⭐ (Recommended)
+    </option>
+`;
     }
 
     // ===== Add Other Present Engineers =====
