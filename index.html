@@ -204,6 +204,11 @@ input, select, button{ padding:8px; }
 <select id="addPresentDropdown"></select>
 <button onclick="addPresentEngineer()">Add</button>
 
+<button onclick="resetPresentEngineers()"
+        style="margin-top:10px;background:#dc2626;color:white;width:100%;">
+    Reset Present Engineers
+</button>
+
 <div id="presentList" style="margin-top:20px;"></div>
 </div>
 
@@ -283,6 +288,39 @@ function toggleFlip(card){
     card.classList.toggle("flipped");
 }
 
+function autoExportCSV(){
+
+    if(cases.length === 0) return;
+
+    let csvContent = "Case ID,Engineer,Level,Region,Severity,Case Type,Assigned Time,Snapshot Time\n";
+
+    const snapshotTime = new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"}) + " IST";
+
+    cases.forEach(c=>{
+        const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
+        const level = engineerDetails ? engineerDetails.level : "";
+
+        const caseType = c.isCar ? "CAR" : "Regular";
+
+        csvContent += `${c.caseId},${c.engineer},${level},${c.region},${c.severity},${caseType},${c.time},${snapshotTime}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+    const fileName = "NOC_Auto_Export.csv";
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    console.log("Auto export completed.");
+}
+
+    setInterval(autoExportCSV, 4 * 60 * 60 * 1000);
 /* ===== AUTO RESET AT 6:00 AM IST ===== */
 
 let lastResetDate = localStorage.getItem("lastResetDate") || null;
@@ -600,12 +638,15 @@ function exportToExcel(){
         return;
     }
 
-    let csvContent = "Case ID,Engineer,Level,Region,Severity,Assigned Time\n";
+    let csvContent = "Case ID,Engineer,Level,Region,Severity,Case Type,Assigned Time\n";
 
     cases.forEach(c=>{
         const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
         const level = engineerDetails ? engineerDetails.level : "";
-        csvContent += `${c.caseId},${c.engineer},${level},${c.region},${c.severity},${c.time}\n`;
+
+        const caseType = c.isCar ? "CAR" : "Regular";
+
+        csvContent += `${c.caseId},${c.engineer},${level},${c.region},${c.severity},${caseType},${c.time}\n`;
     });
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -636,8 +677,43 @@ function resetAllData(){
 
     alert("Dashboard data has been fully reset.");
 }
+    /* ===== AUTO DATA REFRESH EVERY 5 SECONDS ===== */
+setInterval(() => {
+
+    // Reload latest data from localStorage
+    presentEngineers = JSON.parse(localStorage.getItem("presentEngineers")) || [];
+    cases = JSON.parse(localStorage.getItem("cases")) || [];
+
+    render();
+
+}, 5000);
+
+    /* ===== RESET ONLY PRESENT ENGINEERS ===== */
+function resetPresentEngineers(){
+
+    if(!confirm("⚠ This will remove all Engineers marked as Present Today. Continue?"))
+        return;
+
+    presentEngineers = [];
+
+    localStorage.setItem("presentEngineers", JSON.stringify(presentEngineers));
+
+    render();
+
+    alert("Present Engineers list has been reset.");
+}
 render();
 </script>
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
