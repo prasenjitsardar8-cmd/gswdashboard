@@ -397,21 +397,47 @@ function deleteCase(caseId){
 }
 
 function populateDropdowns(){
-    const masterDD=document.getElementById("addPresentDropdown");
-    const assignDD=document.getElementById("assignEngineer");
+
+    const masterDD = document.getElementById("addPresentDropdown");
+    const assignDD = document.getElementById("assignEngineer");
+
+    const levelFilter = document.getElementById("levelFilter").value;
+    const regionSelected = document.getElementById("region").value;
+    const nextEngineer = getNextRecommended(regionSelected, levelFilter);
 
     masterDD.innerHTML = `
-    <option value=''>Select Engineer</option>
-    <option value='__ALL__'>Select All Engineers</option>
-`;
-    assignDD.innerHTML="<option value=''>Select Engineer</option>";
+        <option value=''>Select Engineer</option>
+        <option value='__ALL__'>Select All Engineers</option>
+    `;
 
-    masterEngineers.forEach(e=>{
+    assignDD.innerHTML = "";
+
+    // ===== Add Recommended Engineer FIRST =====
+    if(nextEngineer){
+        assignDD.innerHTML += `
+            <option value="${nextEngineer}" selected>
+                ${nextEngineer} ⭐ (Recommended)
+            </option>
+        `;
+    }
+
+    // ===== Add Other Present Engineers =====
+    masterEngineers.forEach(e => {
+
         if(!presentEngineers.includes(e.name)){
-            masterDD.innerHTML+=`<option value="${e.name}">${e.name} (${e.level} - ${e.region})</option>`;
+            masterDD.innerHTML += `
+                <option value="${e.name}">
+                    ${e.name} (${e.level} - ${e.region})
+                </option>
+            `;
         }
-        if(presentEngineers.includes(e.name)){
-            assignDD.innerHTML+=`<option value="${e.name}">${e.name}</option>`;
+
+        if(presentEngineers.includes(e.name) && e.name !== nextEngineer){
+            assignDD.innerHTML += `
+                <option value="${e.name}">
+                    ${e.name}
+                </option>
+            `;
         }
     });
 }
