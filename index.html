@@ -270,6 +270,25 @@ input, select, button{ padding:8px; }
 
 </div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+</script>
+
 <script>
 
 /* ===== LIVE IST CLOCK ===== */
@@ -351,13 +370,6 @@ const masterEngineers = [
 {level:"L2", name:"Keith", shift:"9:00 PM - 6:00 AM", region:"AMS"}
 ];
 
-let presentEngineers = JSON.parse(localStorage.getItem("presentEngineers")) || [];
-let cases = JSON.parse(localStorage.getItem("cases")) || [];
-
-function saveData(){
-    localStorage.setItem("presentEngineers",JSON.stringify(presentEngineers));
-    localStorage.setItem("cases",JSON.stringify(cases));
-}
 
 /* ===== SMART NEXT ENGINEER ===== */
 function getNextRecommended(region, levelFilter){
@@ -402,7 +414,7 @@ function addCase(){
 
     document.getElementById("isCarCase").checked = false; // reset checkbox
 
-    saveData();
+    db.ref("cases").set(cases);
     render();
 }
 
@@ -428,20 +440,20 @@ function addPresentEngineer(){
         }
     }
 
-    saveData();
+    db.ref("presentEngineers").set(presentEngineers);
     render();
 }
 
 function removePresent(name){
     presentEngineers=presentEngineers.filter(e=>e!==name);
-    saveData();
+    db.ref("presentEngineers").set(presentEngineers);
     render();
 }
 
 function deleteCase(caseId){
     if(!confirm("⚠ Remove case: "+caseId+" ?")) return;
     cases = cases.filter(c=>c.caseId!==caseId);
-    saveData();
+    db.ref("cases").set(cases);
     render();
 }
 
@@ -631,22 +643,13 @@ function resetAllData(){
     presentEngineers = [];
     cases = [];
 
-    localStorage.clear();   // safer full clear
+    db.ref("cases").set([]);
+    db.ref("presentEngineers").set([]);   // safer full clear
 
     render();
 
     alert("Dashboard data has been fully reset.");
 }
-    /* ===== AUTO DATA REFRESH EVERY 5 SECONDS ===== */
-setInterval(() => {
-
-    // Reload latest data from localStorage
-    presentEngineers = JSON.parse(localStorage.getItem("presentEngineers")) || [];
-    cases = JSON.parse(localStorage.getItem("cases")) || [];
-
-    render();
-
-}, 5000);
 
     /* ===== RESET ONLY PRESENT ENGINEERS ===== */
 function resetPresentEngineers(){
@@ -667,9 +670,4 @@ render();
 </body>
 
 </html>
-
-
-
-
-
 
