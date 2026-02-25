@@ -208,6 +208,8 @@ input, select, button{ padding:8px; }
         <option>SEV-3</option>
     </select>
 
+    <input type="text" id="engineerSearch" placeholder="Search Engineer..." onkeyup="filterAssignDropdown()">
+
     <select id="assignEngineer"></select>
     <button onclick="addCase()">Assign Case</button>
 
@@ -391,6 +393,31 @@ function populateDropdowns(){
         }
         if(presentEngineers.includes(e.name)){
             assignDD.innerHTML+=`<option value="${e.name}">${e.name}</option>`;
+        }
+    });
+}
+
+/* ===== SEARCH FILTER FOR ASSIGN ENGINEER ===== */
+function filterAssignDropdown(){
+
+    const searchValue = document
+        .getElementById("engineerSearch")
+        .value.toLowerCase();
+
+    const assignDD = document.getElementById("assignEngineer");
+
+    // Clear current options
+    assignDD.innerHTML = "<option value=''>Select Engineer</option>";
+
+    masterEngineers.forEach(e => {
+
+        // Only show present engineers
+        if(!presentEngineers.includes(e.name)) return;
+
+        // Filter by name
+        if(e.name.toLowerCase().includes(searchValue)){
+            assignDD.innerHTML += 
+                `<option value="${e.name}">${e.name}</option>`;
         }
     });
 }
