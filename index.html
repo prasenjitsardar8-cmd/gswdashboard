@@ -333,12 +333,11 @@ function checkDailyReset(){
     const todayDate = istTime.toISOString().split("T")[0];
 
     // If 6:00 AM IST and not already reset today
-    if(hours === 16 && minutes === 10 && lastResetDate !== todayDate){
+    if(hours === 6 && minutes === 0 && lastResetDate !== todayDate){
         
         // Clear all cases
-        cases = [];
-        saveData();
-        render();
+cases = [];
+db.ref("cases").set([]);
 
         // Mark reset done for today
         lastResetDate = todayDate;
@@ -410,27 +409,35 @@ function getNextRecommended(region, levelFilter){
 }
 
 function addCase(){
-    const caseId=document.getElementById("caseId").value;
-    const region=document.getElementById("region").value;
-    const severity=document.getElementById("severity").value;
-    const engineer=document.getElementById("assignEngineer").value;
-    const isCar=document.getElementById("isCarCase").checked;
 
-    if(!caseId||!engineer) return alert("Enter Case ID & Engineer");
+    const caseId = document.getElementById("caseId").value;
+    const region = document.getElementById("region").value;
+    const severity = document.getElementById("severity").value;
+    const engineer = document.getElementById("assignEngineer").value;
+    const isCar = document.getElementById("isCarCase").checked;
 
-    cases.push({
+    if(!caseId || !engineer)
+        return alert("Enter Case ID & Engineer");
+
+    if(cases.some(c => c.caseId === caseId))
+        return alert("Case ID already exists!");
+
+    const newCase = {
         caseId,
         region,
         severity,
         engineer,
-        isCar,   // ✅ NEW FLAG
-        time:new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
-    });
+        isCar,
+        time: new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
+    };
 
-    document.getElementById("isCarCase").checked = false; // reset checkbox
-
+    cases.push(newCase);
     db.ref("cases").set(cases);
-    render();
+
+    // ✅ Clear & refocus
+    document.getElementById("caseId").value = "";
+    document.getElementById("isCarCase").checked = false;
+    document.getElementById("caseId").focus();
 }
 
 function addPresentEngineer(){
@@ -456,20 +463,20 @@ function addPresentEngineer(){
     }
 
     db.ref("presentEngineers").set(presentEngineers);
-    render();
 }
 
 function removePresent(name){
     presentEngineers=presentEngineers.filter(e=>e!==name);
     db.ref("presentEngineers").set(presentEngineers);
-    render();
 }
 
 function deleteCase(caseId){
+
     if(!confirm("⚠ Remove case: "+caseId+" ?")) return;
+
     cases = cases.filter(c=>c.caseId!==caseId);
+
     db.ref("cases").set(cases);
-    render();
 }
 
 function populateDropdowns(){
@@ -569,7 +576,7 @@ function render(){
                     <p><strong>Region:</strong> ${e.region}</p>
                     <p><strong>Shift:</strong> ${e.shift}</p>
                     <p><strong>Active Cases:</strong> ${engCases.length}</p>
-                    <small>Click to view cases</small>
+                    <small>Hover to view cases</small>
                 </div>
 <div class="flip-back">
     <h3>${e.name} - Assigned Cases</h3>
@@ -655,13 +662,8 @@ function resetAllData(){
 
     if(!confirm("⚠ This will delete ALL engineers present & ALL assigned cases. Continue?")) return;
 
-    presentEngineers = [];
-    cases = [];
-
     db.ref("cases").set([]);
-    db.ref("presentEngineers").set([]);   // safer full clear
-
-    render();
+    db.ref("presentEngineers").set([]);
 
     alert("Dashboard data has been fully reset.");
 }
@@ -672,11 +674,7 @@ function resetPresentEngineers(){
     if(!confirm("⚠ This will remove all Engineers marked as Present Today. Continue?"))
         return;
 
-    presentEngineers = [];
-
-    localStorage.setItem("presentEngineers", JSON.stringify(presentEngineers));
-
-    render();
+    db.ref("presentEngineers").set([]);
 
     alert("Present Engineers list has been reset.");
 }
