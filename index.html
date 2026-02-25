@@ -61,6 +61,20 @@ body { font-family: Arial; margin:0; background:#f4f6f9; display:flex; }
     animation: glowPulse 1.8s infinite ease-in-out;
 }
 
+.car-case{
+    background:#fff3cd;
+    border-left:4px solid #ff9800;
+}
+
+.car-badge{
+    background:#ff9800;
+    color:white;
+    padding:2px 6px;
+    font-size:11px;
+    border-radius:4px;
+    margin-left:5px;
+}
+
 /* ===== MAIN ===== */
 .main{ flex:1; padding:20px; }
 
@@ -232,6 +246,12 @@ input, select, button{ padding:8px; }
     </select>
 
     <select id="assignEngineer"></select>
+
+<label style="display:flex;align-items:center;gap:5px;">
+    <input type="checkbox" id="isCarCase">
+    CAR Case
+</label>
+
     <button onclick="addCase()">Assign Case</button>
 
     <!-- NEW BUTTONS -->
@@ -366,6 +386,8 @@ function addCase(){
     const region=document.getElementById("region").value;
     const severity=document.getElementById("severity").value;
     const engineer=document.getElementById("assignEngineer").value;
+    const isCar=document.getElementById("isCarCase").checked;
+
     if(!caseId||!engineer) return alert("Enter Case ID & Engineer");
 
     cases.push({
@@ -373,8 +395,11 @@ function addCase(){
         region,
         severity,
         engineer,
+        isCar,   // ✅ NEW FLAG
         time:new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
     });
+
+    document.getElementById("isCarCase").checked = false; // reset checkbox
 
     saveData();
     render();
@@ -482,6 +507,8 @@ function render(){
 
         const isPresent=presentEngineers.includes(e.name);
         const engCases=cases.filter(c=>c.engineer===e.name);
+        const normalCases = engCases.filter(c=>!c.isCar);
+        const carCases = engCases.filter(c=>c.isCar);
         const hasSev1=engCases.some(c=>c.severity==="SEV-1");
 
         engCases.forEach(c=>{
@@ -516,22 +543,42 @@ function render(){
                     <p><strong>Active Cases:</strong> ${engCases.length}</p>
                     <small>Click to view cases</small>
                 </div>
-                <div class="flip-back">
-                    <h3>${e.name} - Assigned Cases</h3>
-                    ${engCases.length===0 ? "<p>No assigned cases</p>" :
-                        engCases.map(c=>`
-                            <div class="case">
-                                <strong>${c.caseId}</strong><br>
-                                ${c.region} | ${c.severity}<br>
-                                ${c.time}<br>
-                                <button class="delete-case"
-                                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
-                                    Remove Case
-                                </button>
-                            </div>
-                        `).join("")
-                    }
-                </div>
+<div class="flip-back">
+    <h3>${e.name} - Assigned Cases</h3>
+
+    ${carCases.length > 0 ? `
+        <h4 style="color:#ff9800;">CAR Cases</h4>
+        ${carCases.map(c=>`
+            <div class="case car-case">
+                <strong>${c.caseId}</strong>
+                <span class="car-badge">CAR</span><br>
+                ${c.region} | ${c.severity}<br>
+                ${c.time}<br>
+                <button class="delete-case"
+                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                    Remove Case
+                </button>
+            </div>
+        `).join("")}
+    ` : ""}
+
+    ${normalCases.length > 0 ? `
+        <h4>Regular Cases</h4>
+        ${normalCases.map(c=>`
+            <div class="case">
+                <strong>${c.caseId}</strong><br>
+                ${c.region} | ${c.severity}<br>
+                ${c.time}<br>
+                <button class="delete-case"
+                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                    Remove Case
+                </button>
+            </div>
+        `).join("")}
+    ` : ""}
+
+    ${(normalCases.length===0 && carCases.length===0) ? "<p>No assigned cases</p>" : ""}
+</div>
             </div>
         </div>
         `;
