@@ -6,146 +6,384 @@
 
 <style>
 body { font-family: Arial; margin:0; background:#f4f6f9; display:flex; }
-.sidebar{ width:270px; background:#1f2937; color:white; padding:20px; min-height:100vh; overflow-y:auto; }
-.present-engineer{ background:rgba(255,255,255,0.1); padding:10px; margin-bottom:10px; border-radius:6px; font-size:14px; position:relative; }
-.remove-btn{ position:absolute; right:8px; top:8px; background:red; color:white; border:none; padding:2px 6px; cursor:pointer; font-size:12px; }
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    width:270px;
+    background:#1f2937;
+    color:white;
+    padding:20px;
+    min-height:100vh;
+    overflow-y:auto;
+}
+
+.present-engineer{
+    background:rgba(255,255,255,0.1);
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:6px;
+    font-size:14px;
+    position:relative;
+}
+
+.remove-btn{
+    position:absolute;
+    right:8px;
+    top:8px;
+    background:red;
+    color:white;
+    border:none;
+    padding:2px 6px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+/* ===== RECOMMENDED OPTION GLOW ===== */
+
+@keyframes glowPulse {
+    0% {
+        background-color: #e8f5e9;
+        box-shadow: 0 0 5px #00c853;
+    }
+    50% {
+        background-color: #c8f7c5;
+        box-shadow: 0 0 12px #00c853;
+    }
+    100% {
+        background-color: #e8f5e9;
+        box-shadow: 0 0 5px #00c853;
+    }
+}
+
+.recommended-option {
+    font-weight: bold;
+    color: #00695c;
+    animation: glowPulse 1.8s infinite ease-in-out;
+}
+
+.car-case{
+    background:#fff3cd;
+    border-left:4px solid #ff9800;
+}
+
+.car-badge{
+    background:#ff9800;
+    color:white;
+    padding:2px 6px;
+    font-size:11px;
+    border-radius:4px;
+    margin-left:5px;
+}
+
+/* ===== MAIN ===== */
 .main{ flex:1; padding:20px; }
-.dashboard{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:15px; }
-.flip-card{ perspective:1000px; }
-.flip-inner{ position:relative; width:100%; height:260px; transition:transform 0.6s; transform-style:preserve-3d; }
-.flip-card:hover .flip-inner{ transform: rotateY(180deg); }
-.flip-front, .flip-back{ position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:10px; padding:15px; box-shadow:0 3px 8px rgba(0,0,0,0.1); background:white; }
-.flip-back{ transform:rotateY(180deg); overflow-y:auto; }
-.engineer-card.red .flip-front{ background:#ffdddd; border:2px solid red; }
-.engineer-card.absent .flip-front{ background:#3a3a3a; color:#ccc; }
-.engineer-card.next .flip-front{ border:3px solid #00c853; background:#e8f5e9; }
-.badge{ position:absolute; top:10px; right:10px; background:red; color:white; padding:3px 6px; font-size:12px; border-radius:5px; }
-.case{ background:#f0f0f0; margin:5px 0; padding:8px; border-radius:5px; font-size:14px; }
-.delete-case{ background:red; color:white; border:none; padding:3px 6px; font-size:11px; cursor:pointer; margin-top:5px; }
+
+.top-banner{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:white;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:20px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.banner-left{ display:flex; gap:20px; align-items:center; }
+
+.sev-counter{ font-weight:bold; padding:8px 15px; border-radius:6px; }
+.sev-active{ background:red; color:white; }
+
+.region-summary span{ margin-right:15px; font-weight:bold; }
+
+.ist-clock{ font-weight:bold; font-size:16px; }
+
+.controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+
+input, select, button{ padding:8px; }
+
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:15px;
+}
+
+/* ===== FLIP CARD SYSTEM ===== */
+
+.flip-card{
+    perspective:1000px;
+}
+
+.flip-inner{
+    position:relative;
+    width:100%;
+    height:260px;
+    transition:transform 0.6s;
+    transform-style:preserve-3d;
+}
+
+.flip-card.flipped .flip-inner{
+    transform:rotateY(180deg);
+}
+
+.flip-front, .flip-back{
+    position:absolute;
+    width:100%;
+    height:100%;
+    backface-visibility:hidden;
+    border-radius:10px;
+    padding:15px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+.flip-front{
+    background:white;
+}
+
+.flip-back{
+    background:white;
+    transform:rotateY(180deg);
+    overflow-y:auto;
+}
+
+/* ===== EXISTING STATES APPLIED TO FRONT ONLY ===== */
+
+.engineer-card.red .flip-front{
+    background:#ffdddd;
+    border:2px solid red;
+}
+
+.engineer-card.absent .flip-front{
+    background:#3a3a3a;
+    color:#ccc;
+}
+
+.engineer-card.next .flip-front{
+    border:3px solid #00c853;
+    background:#e8f5e9;
+}
+
+.badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:red;
+    color:white;
+    padding:3px 6px;
+    font-size:12px;
+    border-radius:5px;
+}
+
+.case{
+    background:#f0f0f0;
+    margin:5px 0;
+    padding:8px;
+    border-radius:5px;
+    font-size:14px;
+}
+
+.delete-case{
+    background:red;
+    color:white;
+    border:none;
+    padding:3px 6px;
+    font-size:11px;
+    cursor:pointer;
+    margin-top:5px;
+}
 </style>
 </head>
 <body>
 
+
+
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar">
 <h2>Engineers Present Today</h2>
+
 <select id="addPresentDropdown"></select>
 <button onclick="addPresentEngineer()">Add</button>
+
+<button onclick="resetPresentEngineers()"
+        style="margin-top:10px;background:#dc2626;color:white;width:100%;">
+    Reset Present Engineers
+</button>
+
 <div id="presentList" style="margin-top:20px;"></div>
 </div>
 
+<!-- ===== MAIN ===== -->
 <div class="main">
+
 <h1>Engineer Case Assignment Dashboard</h1>
 
-<input type="text" id="caseId" placeholder="Case ID">
-<select id="region">
-<option>AMS</option>
-<option>APJ</option>
-<option>EMEA</option>
-</select>
-<select id="severity">
-<option>SEV-1</option>
-<option>SEV-2</option>
-<option>SEV-3</option>
-</select>
-<select id="assignEngineer"></select>
-<label>
-<input type="checkbox" id="isCarCase"> CAR Case
-</label>
-<button onclick="addCase()">Assign Case</button>
-<button onclick="resetAllData()">Reset All Data</button>
-
-<div class="dashboard" id="dashboard"></div>
+<div class="top-banner">
+    <div class="banner-left">
+        <div id="sevCounter" class="sev-counter">SEV-1 Active: 0</div>
+        <div class="region-summary">
+            <span id="amsCount">AMS: 0</span>
+            <span id="apjCount">APJ: 0</span>
+            <span id="emeaCount">EMEA: 0</span>
+        </div>
+    </div>
+    <div id="istClock" class="ist-clock"></div>
 </div>
 
-<script type="module">
+<div class="controls">
+    <select id="levelFilter" onchange="render()">
+        <option value="ALL">All Engineers</option>
+        <option value="L1">L1 Engineers</option>
+        <option value="L2">L2 Engineers</option>
+    </select>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <input type="text" id="caseId" placeholder="Case ID">
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MSG_ID",
-  appId: "YOUR_APP_ID"
-};
+    <select id="region" onchange="render()">
+        <option>AMS</option>
+        <option>APJ</option>
+        <option>EMEA</option>
+    </select>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+    <select id="severity">
+        <option>SEV-1</option>
+        <option>SEV-2</option>
+        <option>SEV-3</option>
+    </select>
 
-const masterEngineers = [
+    <select id="assignEngineer"></select>
 
-/* ================= L1 ENGINEERS ================= */
+<label style="display:flex;align-items:center;gap:5px;">
+    <input type="checkbox" id="isCarCase">
+    CAR Case
+</label>
 
-{ level:"L1", name:"Aaditya", shift:"5:30 AM - 2:30 PM", region:"APJ" },
-{ level:"L1", name:"Rituja", shift:"5:30 AM - 2:30 PM", region:"APJ" },
-{ level:"L1", name:"Aayush", shift:"5:30 AM - 2:30 PM", region:"APJ" },
-{ level:"L1", name:"Namneet", shift:"5:30 AM - 2:30 PM", region:"APJ" },
-{ level:"L1", name:"Devyani", shift:"5:30 AM - 2:30 PM", region:"APJ" },
+    <button onclick="addCase()">Assign Case</button>
 
-{ level:"L1", name:"Ashish", shift:"11:00 AM - 8:00 PM", region:"APJ" },
-{ level:"L1", name:"Tanisha N", shift:"11:00 AM - 8:00 PM", region:"APJ" },
+    <!-- NEW BUTTONS -->
+    <button onclick="exportToExcel()">Export to Excel</button>
+    <button onclick="resetAllData()" style="background:#b91c1c;color:white;">
+        Reset All Data
+    </button>
+</div>
 
-{ level:"L1", name:"Avinash", shift:"1:30 PM - 10:30 PM", region:"EMEA" },
-{ level:"L1", name:"Vrushali", shift:"1:30 PM - 10:30 PM", region:"EMEA" },
-{ level:"L1", name:"Yashaswini", shift:"1:30 PM - 10:30 PM", region:"EMEA" },
-{ level:"L1", name:"Avleen", shift:"3:00 PM - 12:00 AM", region:"EMEA" },
+<div class="dashboard" id="dashboard"></div>
 
-{ level:"L1", name:"Vansh", shift:"1:30 PM - 10:30 PM", region:"AMS" },
+</div>
 
-{ level:"L1", name:"Mayank", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Sakshi", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Swarupa", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Prabhnoor", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Shafiya", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Shefali", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Navya", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L1", name:"Akshay", shift:"5:00 PM - 2:00 AM", region:"AMS" },
+<script>
 
-{ level:"L1", name:"Sufiyan", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-{ level:"L1", name:"Afsan", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-{ level:"L1", name:"Abhilash", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-{ level:"L1", name:"Rudrani", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-{ level:"L1", name:"Anubhav", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-{ level:"L1", name:"Tanisha K", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-{ level:"L1", name:"Suraj", shift:"9:00 PM - 6:00 AM", region:"AMS" },
-
-/* ================= L2 ENGINEERS ================= */
-
-{ level:"L2", name:"Prasenjit", shift:"1:30 PM - 10:30 PM", region:"AMS" },
-{ level:"L2", name:"Isha", shift:"5:00 PM - 2:00 AM", region:"AMS" },
-{ level:"L2", name:"Keith", shift:"9:00 PM - 6:00 AM", region:"AMS" }
-
-];
-
-let presentEngineers = [];
-let cases = [];
-
-function saveData(){
-    set(ref(db,"dashboardData"),{
-        presentEngineers,
-        cases
+/* ===== LIVE IST CLOCK ===== */
+function updateISTClock(){
+    const now = new Date().toLocaleString("en-IN",{
+        timeZone:"Asia/Kolkata",
+        hour12:false
     });
+    document.getElementById("istClock").innerText="IST Time: "+now;
+}
+setInterval(updateISTClock,1000);
+updateISTClock();
+
+/* ===== FLIP FUNCTION ===== */
+function toggleFlip(card){
+    card.classList.toggle("flipped");
 }
 
-onValue(ref(db,"dashboardData"), snapshot=>{
-    const data = snapshot.val();
-    if(data){
-        presentEngineers = data.presentEngineers || [];
-        cases = data.cases || [];
-        render();
-    }
-});
+/* ===== AUTO RESET AT 6:00 AM IST ===== */
 
-function addPresentEngineer(){
-    const name=document.getElementById("addPresentDropdown").value;
-    if(name && !presentEngineers.includes(name)){
-        presentEngineers.push(name);
+let lastResetDate = localStorage.getItem("lastResetDate") || null;
+
+function checkDailyReset(){
+    const now = new Date();
+    const istTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
+
+    const hours = istTime.getHours();
+    const minutes = istTime.getMinutes();
+    const todayDate = istTime.toISOString().split("T")[0];
+
+    // If 6:00 AM IST and not already reset today
+    if(hours === 16 && minutes === 10 && lastResetDate !== todayDate){
+        
+        // Clear all cases
+        cases = [];
         saveData();
+        render();
+
+        // Mark reset done for today
+        lastResetDate = todayDate;
+        localStorage.setItem("lastResetDate", todayDate);
+
+        alert("✅ Dashboard counters reset for new day (6:00 AM IST)");
     }
+}
+
+// Check every 30 seconds
+setInterval(checkDailyReset, 30000);
+
+/* ===== MASTER ENGINEERS ===== */
+const masterEngineers = [
+{level:"L1", name:"Aaditya", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Rituja", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Aayush", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Namneet", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Devyani", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Ashish", shift:"11:00 AM - 8:00 PM", region:"APJ"},
+{level:"L1", name:"Tanisha N", shift:"11:00 AM - 8:00 PM", region:"APJ"},
+{level:"L1", name:"Avinash", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Vrushali", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Yashaswini", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Avleen", shift:"3:00 PM - 12:00 AM", region:"EMEA"},
+{level:"L1", name:"Vansh", shift:"1:30 PM - 10:30 PM", region:"AMS"},
+{level:"L1", name:"Mayank", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Sakshi", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Swarupa", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Prabhnoor", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Shafiya", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Shefali", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Navya", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Akshay", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Sufiyan", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Afsan", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Abhilash", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Rudrani", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Anubhav", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Tanisha K", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Suraj", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L2", name:"Prasenjit", shift:"1:30 PM - 10:30 PM", region:"AMS"},
+{level:"L2", name:"Isha", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L2", name:"Keith", shift:"9:00 PM - 6:00 AM", region:"AMS"}
+];
+
+let presentEngineers = JSON.parse(localStorage.getItem("presentEngineers")) || [];
+let cases = JSON.parse(localStorage.getItem("cases")) || [];
+
+function saveData(){
+    localStorage.setItem("presentEngineers",JSON.stringify(presentEngineers));
+    localStorage.setItem("cases",JSON.stringify(cases));
+}
+
+/* ===== SMART NEXT ENGINEER ===== */
+function getNextRecommended(region, levelFilter){
+    const eligible = masterEngineers.filter(e =>
+        presentEngineers.includes(e.name) &&
+        e.region === region &&
+        (levelFilter==="ALL" || e.level===levelFilter)
+    );
+    if(eligible.length===0) return null;
+
+    let minCases = Infinity;
+    let recommended = null;
+
+    eligible.forEach(e=>{
+        const count = cases.filter(c=>c.engineer===e.name).length;
+        if(count < minCases){
+            minCases = count;
+            recommended = e.name;
+        }
+    });
+
+    return recommended;
 }
 
 function addCase(){
@@ -155,88 +393,288 @@ function addCase(){
     const engineer=document.getElementById("assignEngineer").value;
     const isCar=document.getElementById("isCarCase").checked;
 
-    if(!caseId || !engineer) return alert("Enter Case ID & Engineer");
+    if(!caseId||!engineer) return alert("Enter Case ID & Engineer");
 
     cases.push({
         caseId,
         region,
         severity,
         engineer,
-        isCar,
-        time:new Date().toLocaleString()
+        isCar,   // ✅ NEW FLAG
+        time:new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
     });
 
+    document.getElementById("isCarCase").checked = false; // reset checkbox
+
     saveData();
+    render();
+}
+
+function addPresentEngineer(){
+
+    const name = document.getElementById("addPresentDropdown").value;
+
+    if(!name) return;
+
+    // ✅ If Select All chosen
+    if(name === "__ALL__"){
+
+        masterEngineers.forEach(e=>{
+            if(!presentEngineers.includes(e.name)){
+                presentEngineers.push(e.name);
+            }
+        });
+
+    } else {
+
+        if(!presentEngineers.includes(name)){
+            presentEngineers.push(name);
+        }
+    }
+
+    saveData();
+    render();
+}
+
+function removePresent(name){
+    presentEngineers=presentEngineers.filter(e=>e!==name);
+    saveData();
+    render();
 }
 
 function deleteCase(caseId){
+    if(!confirm("⚠ Remove case: "+caseId+" ?")) return;
     cases = cases.filter(c=>c.caseId!==caseId);
     saveData();
+    render();
 }
 
-function resetAllData(){
-    if(confirm("Reset ALL data?")){
-        presentEngineers=[];
-        cases=[];
-        saveData();
+function populateDropdowns(){
+
+    const masterDD = document.getElementById("addPresentDropdown");
+    const assignDD = document.getElementById("assignEngineer");
+
+    const levelFilter = document.getElementById("levelFilter").value;
+    const regionSelected = document.getElementById("region").value;
+    const nextEngineer = getNextRecommended(regionSelected, levelFilter);
+
+    masterDD.innerHTML = `
+        <option value=''>Select Engineer</option>
+        <option value='__ALL__'>Select All Engineers</option>
+    `;
+
+    assignDD.innerHTML = "";
+
+    // ===== Add Recommended Engineer FIRST =====
+    if(nextEngineer){
+assignDD.innerHTML += `
+    <option value="${nextEngineer}" selected class="recommended-option">
+        ${nextEngineer} ⭐ (Recommended)
+    </option>
+`;
     }
+
+    // ===== Add Other Present Engineers =====
+    masterEngineers.forEach(e => {
+
+        if(!presentEngineers.includes(e.name)){
+            masterDD.innerHTML += `
+                <option value="${e.name}">
+                    ${e.name} (${e.level} - ${e.region})
+                </option>
+            `;
+        }
+
+        if(presentEngineers.includes(e.name) && e.name !== nextEngineer){
+            assignDD.innerHTML += `
+                <option value="${e.name}">
+                    ${e.name}
+                </option>
+            `;
+        }
+    });
 }
 
 function render(){
-
     const dashboard=document.getElementById("dashboard");
     const presentList=document.getElementById("presentList");
-    const assignDD=document.getElementById("assignEngineer");
-    const presentDD=document.getElementById("addPresentDropdown");
+    const levelFilter=document.getElementById("levelFilter").value;
+    const regionSelected=document.getElementById("region").value;
+    const nextEngineer=getNextRecommended(regionSelected, levelFilter);
 
     dashboard.innerHTML="";
     presentList.innerHTML="";
-    assignDD.innerHTML="";
-    presentDD.innerHTML="<option value=''>Select Engineer</option>";
+
+    let sev1=0,ams=0,apj=0,emea=0;
 
     masterEngineers.forEach(e=>{
-        presentDD.innerHTML+=`<option value="${e.name}">${e.name}</option>`;
-        if(presentEngineers.includes(e.name)){
-            assignDD.innerHTML+=`<option value="${e.name}">${e.name}</option>`;
-            presentList.innerHTML+=`<div class="present-engineer">${e.name}</div>`;
-        }
-    });
+        if(levelFilter!=="ALL" && e.level!==levelFilter) return;
 
-    masterEngineers.forEach(e=>{
+        const isPresent=presentEngineers.includes(e.name);
         const engCases=cases.filter(c=>c.engineer===e.name);
+        const normalCases = engCases.filter(c=>!c.isCar);
+        const carCases = engCases.filter(c=>c.isCar);
         const hasSev1=engCases.some(c=>c.severity==="SEV-1");
 
+        engCases.forEach(c=>{
+            if(c.severity==="SEV-1") sev1++;
+            if(c.region==="AMS") ams++;
+            if(c.region==="APJ") apj++;
+            if(c.region==="EMEA") emea++;
+        });
+
+        if(isPresent){
+            presentList.innerHTML+=`
+                <div class="present-engineer">
+                    <strong>${e.name} (${e.level} - ${e.region})</strong><br>${e.shift}
+                    <button class="remove-btn" onclick="removePresent('${e.name}')">X</button>
+                </div>
+            `;
+        }
+
         let cardClass="engineer-card";
-        if(!presentEngineers.includes(e.name)) cardClass+=" absent";
-        if(hasSev1) cardClass+=" red";
+        if(!isPresent) cardClass+=" absent";
+        if(isPresent && hasSev1) cardClass+=" red";
+        if(e.name===nextEngineer) cardClass+=" next";
 
         dashboard.innerHTML+=`
-        <div class="flip-card ${cardClass}">
+        <div class="flip-card ${cardClass}" onclick="toggleFlip(this)">
             <div class="flip-inner">
                 <div class="flip-front">
-                    ${hasSev1?'<div class="badge">SEV-1 ACTIVE</div>':''}
-                    <h3>${e.name}</h3>
-                    <p>Active Cases: ${engCases.length}</p>
+                    ${hasSev1 && isPresent?'<div class="badge">SEV-1 ACTIVE</div>':''}
+                    <h3>${e.name} (${e.level})</h3>
+                    <p><strong>Region:</strong> ${e.region}</p>
+                    <p><strong>Shift:</strong> ${e.shift}</p>
+                    <p><strong>Active Cases:</strong> ${engCases.length}</p>
+                    <small>Click to view cases</small>
                 </div>
-                <div class="flip-back">
-                    ${engCases.length===0?"No cases":""}
-                    ${engCases.map(c=>`
-                        <div class="case">
-                            <strong>${c.caseId}</strong><br>
-                            ${c.region} | ${c.severity}
-                            ${c.isCar?'<span style="color:orange;"> (CAR)</span>':''}
-                            <br><button class="delete-case" onclick="deleteCase('${c.caseId}')">Remove</button>
-                        </div>
-                    `).join("")}
-                </div>
+<div class="flip-back">
+    <h3>${e.name} - Assigned Cases</h3>
+
+    ${carCases.length > 0 ? `
+        <h4 style="color:#ff9800;">CAR Cases</h4>
+        ${carCases.map(c=>`
+            <div class="case car-case">
+                <strong>${c.caseId}</strong>
+                <span class="car-badge">CAR</span><br>
+                ${c.region} | ${c.severity}<br>
+                ${c.time}<br>
+                <button class="delete-case"
+                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                    Remove Case
+                </button>
+            </div>
+        `).join("")}
+    ` : ""}
+
+    ${normalCases.length > 0 ? `
+        <h4>Regular Cases</h4>
+        ${normalCases.map(c=>`
+            <div class="case">
+                <strong>${c.caseId}</strong><br>
+                ${c.region} | ${c.severity}<br>
+                ${c.time}<br>
+                <button class="delete-case"
+                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                    Remove Case
+                </button>
+            </div>
+        `).join("")}
+    ` : ""}
+
+    ${(normalCases.length===0 && carCases.length===0) ? "<p>No assigned cases</p>" : ""}
+</div>
             </div>
         </div>
         `;
     });
+
+    document.getElementById("sevCounter").textContent="SEV-1 Active: "+sev1;
+    document.getElementById("sevCounter").className="sev-counter "+(sev1>0?"sev-active":"");
+    document.getElementById("amsCount").textContent="AMS: "+ams;
+    document.getElementById("apjCount").textContent="APJ: "+apj;
+    document.getElementById("emeaCount").textContent="EMEA: "+emea;
+
+    populateDropdowns();
+}
+/* ===== EXPORT TO EXCEL ===== */
+function exportToExcel(){
+
+    if(cases.length === 0){
+        alert("No data to export.");
+        return;
+    }
+
+    let csvContent = "Case ID,Engineer,Level,Region,Severity,Assigned Time\n";
+
+    cases.forEach(c=>{
+        const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
+        const level = engineerDetails ? engineerDetails.level : "";
+        csvContent += `${c.caseId},${c.engineer},${level},${c.region},${c.severity},${c.time}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Engineer_Case_Dashboard_Data.csv";
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
-render();
 
+/* ===== RESET ALL DATA ===== */
+function resetAllData(){
+
+    if(!confirm("⚠ This will delete ALL engineers present & ALL assigned cases. Continue?")) return;
+
+    presentEngineers = [];
+    cases = [];
+
+    localStorage.clear();   // safer full clear
+
+    render();
+
+    alert("Dashboard data has been fully reset.");
+}
+    /* ===== AUTO DATA REFRESH EVERY 5 SECONDS ===== */
+setInterval(() => {
+
+    // Reload latest data from localStorage
+    presentEngineers = JSON.parse(localStorage.getItem("presentEngineers")) || [];
+    cases = JSON.parse(localStorage.getItem("cases")) || [];
+
+    render();
+
+}, 5000);
+
+    /* ===== RESET ONLY PRESENT ENGINEERS ===== */
+function resetPresentEngineers(){
+
+    if(!confirm("⚠ This will remove all Engineers marked as Present Today. Continue?"))
+        return;
+
+    presentEngineers = [];
+
+    localStorage.setItem("presentEngineers", JSON.stringify(presentEngineers));
+
+    render();
+
+    alert("Present Engineers list has been reset.");
+}
+render();
 </script>
 </body>
+
 </html>
+
+
+
+
+
+
+
