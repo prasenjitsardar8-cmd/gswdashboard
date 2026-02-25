@@ -733,7 +733,7 @@ function resetAllData(){
     alert("Dashboard data has been fully reset.");
 }
     /* ===== AUTO DATA REFRESH EVERY 5 SECONDS ===== */
-setInterval(() => {
+/*setInterval(() => {
 
     // Reload latest data from localStorage
     presentEngineers = JSON.parse(localStorage.getItem("presentEngineers")) || [];
@@ -741,7 +741,7 @@ setInterval(() => {
 
     render();
 
-}, 10000);
+}, 10000);*/
 
     /* ===== RESET ONLY PRESENT ENGINEERS ===== */
 function resetPresentEngineers(){
@@ -762,6 +762,7 @@ render();
 </body>
 
 </html>
+
 
 
 
