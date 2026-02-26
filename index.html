@@ -636,18 +636,16 @@ function exportToExcel(){
         return;
     }
 
-    // ✅ Added Case Type column
     let csvContent = "Case ID,Engineer,Level,Region,Severity,Assigned Time,Case Type\n";
 
     cases.forEach(c=>{
 
         const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
         const level = engineerDetails ? engineerDetails.level : "";
-
-        // ✅ Determine Case Type
         const caseType = c.isCar ? "CAR" : "Regular";
 
-        csvContent += `${c.caseId},${c.engineer},${level},${c.region},${c.severity},${c.time},${caseType}\n`;
+        // ✅ Force Case ID as TEXT
+        csvContent += `="${c.caseId}",${c.engineer},${level},${c.region},${c.severity},"${c.time}",${caseType}\n`;
     });
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
