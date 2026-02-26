@@ -566,7 +566,9 @@ function render(){
         if(isPresent){
             presentList.innerHTML+=`
                 <div class="present-engineer">
-                    <strong>${e.name} (${e.level} - ${e.region})</strong><br>${e.shift}
+                    <strong>${e.name}</strong><br>
+                            Region: ${e.region}<br>
+                            Shift: ${e.shift}
                     <button class="remove-btn" onclick="removePresent('${e.name}')">X</button>
                 </div>
             `;
@@ -582,7 +584,7 @@ function render(){
             <div class="flip-inner">
                 <div class="flip-front">
                     ${hasSev1 && isPresent?'<div class="badge">SEV-1 ACTIVE</div>':''}
-                    <h3>${e.name} (${e.level})</h3>
+                    <h3>${e.name}</h3>
                     <p><strong>Region:</strong> ${e.region}</p>
                     <p><strong>Shift:</strong> ${e.shift}</p>
                     <p><strong>Active Cases:</strong> ${engCases.length}</p>
