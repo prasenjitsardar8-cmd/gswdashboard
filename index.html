@@ -411,24 +411,32 @@ function getNextRecommended(region, levelFilter){
 
 function addCase(){
 
-    const caseId = document.getElementById("caseId").value;
+    const caseId = document.getElementById("caseId").value.trim();
     const region = document.getElementById("region").value;
     const severity = document.getElementById("severity").value;
     const engineer = document.getElementById("assignEngineer").value;
     const isCar = document.getElementById("isCarCase").checked;
 
-    if(!caseId || !engineer)
-        return alert("Enter Case ID & Engineer");
+    if(!caseId || !engineer){
+        alert("Enter Case ID & Engineer");
+        return;
+    }
 
-    if(cases.some(c => c.caseId === caseId))
-        return alert("Case ID already exists!");
+    if(cases.some(c => c.caseId === caseId)){
+        alert("Case ID already exists!");
+        return;
+    }
+
+    // ✅ Get engineer details properly
+    const engineerDetails = masterEngineers.find(e => e.name === engineer);
+    const level = engineerDetails ? engineerDetails.level : "";
 
     const newCase = {
         caseId,
         region,
         severity,
         engineer,
-        level: engineerDetails.level, 
+        level,
         isCar,
         time: new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
     };
@@ -436,7 +444,7 @@ function addCase(){
     cases.push(newCase);
     db.ref("cases").set(cases);
 
-    // ✅ Clear & refocus
+    // Clear fields
     document.getElementById("caseId").value = "";
     document.getElementById("isCarCase").checked = false;
     document.getElementById("caseId").focus();
