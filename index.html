@@ -264,7 +264,6 @@ input, select, button{ padding:8px; }
     <button onclick="resetAllData()" style="background:#b91c1c;color:white;">
         Reset All Data
     </button>
-     <button onclick="createManualBackup()">Backup Now</button>
 </div>
 
 <div class="dashboard" id="dashboard"></div>
@@ -319,71 +318,12 @@ function updateISTClock(){
 setInterval(updateISTClock,1000);
 updateISTClock();
 
-/* ===== HOURLY AUTO BACKUP SYSTEM ===== */
 
-let lastBackupHour = localStorage.getItem("lastBackupHour") || null;
-
-function createHourlyBackup(){
-
-    const nowIST = new Date().toLocaleString("en-US", {
-        timeZone: "Asia/Kolkata"
-    });
-
-    const dateObj = new Date(nowIST);
-
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth()+1).padStart(2,'0');
-    const day = String(dateObj.getDate()).padStart(2,'0');
-    const hour = String(dateObj.getHours()).padStart(2,'0');
-
-    const backupKey = `${year}-${month}-${day}_${hour}`;
-
-    // Prevent duplicate backup within same hour
-    if(lastBackupHour === backupKey) return;
-
-    const backupData = {
-        timestamp: nowIST + " IST",
-        cases: cases || [],
-        presentEngineers: presentEngineers || []
-    };
-
-    db.ref("backups/" + backupKey).set(backupData);
-
-    lastBackupHour = backupKey;
-    localStorage.setItem("lastBackupHour", backupKey);
-
-    console.log("✅ Hourly Backup Created:", backupKey);
-}
-
-/* Check every 5 minutes */
-setInterval(createHourlyBackup, 300000);
-
-function createManualBackup(){
-
-    const now = new Date().toLocaleString("en-IN",{
-        timeZone:"Asia/Kolkata"
-    });
-
-    const key = "Manual_" + Date.now();
-
-    const backupData = {
-        timestamp: now + " IST",
-        cases: cases || [],
-        presentEngineers: presentEngineers || []
-    };
-
-    db.ref("backups/" + key).set(backupData);
-
-    alert("✅ Manual Backup Created Successfully!");
-}
-
-
-/* ===== AUTO RESET WITH BACKUP AT 6:00 AM IST ===== */
+/* ===== AUTO RESET AT 6:00 AM IST ===== */
 
 let lastResetDate = localStorage.getItem("lastResetDate") || null;
 
 function checkDailyReset(){
-
     const now = new Date();
     const istTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
@@ -393,35 +333,18 @@ function checkDailyReset(){
     const minutes = istTime.getMinutes();
     const todayDate = istTime.toISOString().split("T")[0];
 
-    // Run exactly at 6:00 AM IST
+    // If 6:00 AM IST and not already reset today
     if(hours === 6 && minutes === 0 && lastResetDate !== todayDate){
+        
+        // Clear all cases
+cases = [];
+db.ref("cases").set([]);
 
-        /* ===== STEP 1: CREATE FINAL DAILY BACKUP ===== */
-
-        const backupKey = "DailyBackup_" + todayDate;
-
-        const backupData = {
-            timestamp: istTime.toLocaleString("en-IN") + " IST",
-            type: "Daily Auto Backup Before Reset",
-            cases: cases || [],
-            presentEngineers: presentEngineers || []
-        };
-
-        db.ref("backups/" + backupKey).set(backupData);
-
-        console.log("✅ Daily Backup Created Before Reset");
-
-        /* ===== STEP 2: RESET ONLY CASES ===== */
-
-        cases = [];
-        db.ref("cases").set([]);
-
-        /* ===== STEP 3: MARK RESET COMPLETE ===== */
-
+        // Mark reset done for today
         lastResetDate = todayDate;
         localStorage.setItem("lastResetDate", todayDate);
 
-        alert("✅ Daily backup created & Dashboard reset at 6:00 AM IST");
+        alert("✅ Dashboard counters reset for new day (6:00 AM IST)");
     }
 }
 
