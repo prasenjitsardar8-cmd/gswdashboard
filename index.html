@@ -1196,4 +1196,1203 @@ setInterval(autoExportHourly, 3600000);
 </script>
 </body>
 
+</html><!DOCTYPE html>
+<html>
+<head>
+<title>NOC Engineer Case Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+/* ===== GLOBAL ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin:0;
+    background:#f1f5f9;
+    display:flex;
+    color:#1e293b;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    width:260px;
+    background:#111827;
+    color:#e5e7eb;
+    padding:18px;
+    min-height:100vh;
+    overflow-y:auto;
+}
+
+.sidebar h2{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:15px;
+    letter-spacing:.3px;
+}
+
+/* ===== ENGINEER NAME STYLING ===== */
+
+/* Sidebar Present Engineer Name */
+.present-engineer strong{
+    font-weight:700;
+    font-size:14px;
+    background:#1f2937;
+    padding:3px 8px;
+    border-radius:6px;
+    display:inline-block;
+}
+
+/* Front Card Name */
+.flip-front h3{
+    font-weight:700;
+    font-size:16px;
+    background:#e2e8f0;
+    padding:6px 10px;
+    border-radius:8px;
+    display:inline-block;
+}
+
+/* Back Card Name */
+.flip-back h3{
+    font-weight:700;
+    font-size:15px;
+    background:#e2e8f0;
+    padding:5px 10px;
+    border-radius:8px;
+    display:inline-block;
+}
+
+/* Present Engineer Card (Reduced Spacing) */
+.present-engineer{
+    background:rgba(255,255,255,0.06);
+    padding:8px 10px;
+    margin-bottom:8px;
+    border-radius:6px;
+    font-size:13px;
+    line-height:1.4;
+    position:relative;
+    transition:.2s ease;
+}
+
+.present-engineer strong{
+    font-weight:600;
+    color:#ffffff;
+    background:rgba(255,255,255,0.08);
+    padding:2px 6px;
+    border-radius:4px;
+}
+
+.present-engineer:hover{
+    background:rgba(255,255,255,0.12);
+}
+
+.remove-btn{
+    position:absolute;
+    right:6px;
+    top:6px;
+    background:#dc2626;
+    border:none;
+    color:white;
+    padding:2px 6px;
+    cursor:pointer;
+    font-size:11px;
+    border-radius:4px;
+}
+
+.engineer-card.next .flip-front{
+    background:#dcfce7;
+    border:2px solid #16a34a;
+    animation:nextGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes nextGlow{
+    from{ box-shadow:0 0 6px rgba(22,163,74,0.35); }
+    to{ box-shadow:0 0 18px rgba(22,163,74,0.7); }
+}
+
+/* ===== MAIN ===== */
+.main{
+    flex:1;
+    padding:22px;
+}
+
+h1{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:18px;
+}
+
+/* ===== TOP BANNER ===== */
+.top-banner{
+    display:flex;
+    align-items:center;
+    gap:30px;
+    background:white;
+    padding:14px 18px;
+    border-radius:10px;
+    margin-bottom:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    flex-wrap:nowrap;      /* Prevent wrapping */
+}
+
+/* Make everything inline */
+.sev-counter,
+.region-summary span{
+    display:inline-block;
+}
+
+/* Remove extra spacing issue */
+.region-summary{
+    display:flex;
+    gap:25px;
+    margin:0;
+}
+
+.sev-active{
+    background:#dc2626;
+    color:white;
+}
+
+/* ===== CONTROLS ===== */
+.controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+input, select{
+    padding:7px 10px;
+    border-radius:6px;
+    border:1px solid #e2e8f0;
+    font-size:13px;
+}
+
+button{
+    padding:7px 14px;
+    border-radius:6px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    font-weight:500;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+/* ===== DASHBOARD GRID ===== */
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:14px;
+}
+
+/* ===== FLIP CARD SYSTEM ===== */
+.flip-card{
+    perspective:1000px;
+}
+
+.flip-card:hover .flip-inner{
+    transform: rotateY(180deg);
+}
+
+.flip-inner{
+    position:relative;
+    width:100%;
+    height:260px;   /* increased */
+    transition:transform 0.6s;
+    transform-style:preserve-3d;
+}
+
+.flip-front, .flip-back{
+    position:absolute;
+    width:100%;
+    height:100%;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;   /* 👈 add this line */
+    border-radius:12px;
+    padding:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.05);
+}
+
+/* ===== FRONT CARD ===== */
+.flip-front{
+    background:white;
+}
+
+/* Subtle Name Highlight */
+.flip-front h3{
+    font-size:15px;
+    font-weight:600;
+    margin-bottom:6px;
+    padding:4px 8px;
+    background:#f1f5f9;
+    border-radius:6px;
+    display:inline-block;
+}
+
+.flip-front p{
+    font-size:13px;
+    margin:4px 0;
+}
+
+/* Make front card vertical layout */
+.flip-front{
+    background:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;   /* important */
+}
+
+/* ===== BACK CARD ===== */
+.flip-back{
+    background:white;
+    transform:rotateY(180deg);
+    overflow-y:auto;
+    font-size:13px;
+}
+
+.flip-back{
+    background:white;
+    transform:rotateY(180deg);
+    overflow-y:auto;
+    font-size:13px;
+    scrollbar-gutter: stable;   /* 👈 important */
+}
+
+/* ===== DISABLE FLIP FOR ABSENT ENGINEERS ===== */
+.engineer-card.absent:hover .flip-inner{
+    transform: none !important;
+}
+
+/* ===== ON BREAK STATE ===== */
+.engineer-card.onbreak .flip-front{
+    background:#e0f2fe;
+    border:2px solid #0284c7;
+    box-shadow:0 0 12px rgba(2,132,199,0.45);
+    animation:onBreakGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes onBreakGlow{
+    from{ box-shadow:0 0 6px rgba(2,132,199,0.35); }
+    to{ box-shadow:0 0 18px rgba(2,132,199,0.7); }
+}
+
+.onbreak-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#0284c7;
+    color:white;
+    padding:4px 10px;
+    border-radius:16px;
+    font-size:12px;
+    font-weight:600;
+    margin-top:4px;
+}
+
+/* Subtle pulsing glow */
+@keyframes onCallGlow{
+    from{
+        box-shadow:0 0 8px rgba(249,115,22,0.35);
+    }
+    to{
+        box-shadow:0 0 18px rgba(249,115,22,0.6);
+    }
+}
+
+/* Phone + Text Badge (Always at Bottom of Content) */
+.oncall-badge{
+    display:inline-flex;          /* safer than flex */
+    align-items:center;
+    gap:6px;
+    background:#f97316;
+    color:white;
+    padding:4px 10px;
+    border-radius:16px;
+    font-size:12px;
+    font-weight:600;
+    margin-top:4px;               /* tight gap */
+}
+
+/* ===== STATUS STATES ===== */
+.engineer-card.red .flip-front{
+    background:#fee2e2;
+    border:1px solid #dc2626;
+}
+
+/* ===== ABSENT ENGINEER FULL GREY CARD ===== */
+.engineer-card.absent .flip-front,
+.engineer-card.absent .flip-back{
+    background:#f1f5f9;
+    border:1px solid #e2e8f0;
+    color:#64748b;
+}
+
+/* Muted inner text */
+.engineer-card.absent p,
+.engineer-card.absent small{
+    color:#94a3b8;
+}
+
+/* Softer name highlight */
+.engineer-card.absent .flip-front h3{
+    background:#e2e8f0;
+    color:#475569;
+}
+
+/* Optional: hide hover hint */
+.engineer-card.absent small{
+    display:none;
+}
+/* Badge styling */
+.not-present-badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:#dc2626;          /* Red */
+    color:white;
+    padding:4px 10px;
+    font-size:10px;
+    border-radius:6px;
+    font-weight:700;
+    letter-spacing:0.4px;
+    box-shadow:0 2px 6px rgba(220,38,38,0.3);
+}
+
+/* ===== BADGES ===== */
+.badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:#dc2626;
+    color:white;
+    padding:3px 7px;
+    font-size:11px;
+    border-radius:5px;
+}
+
+/* ===== CASE STYLING ===== */
+.case{
+    background:#f8fafc;
+    margin:6px 0;
+    padding:8px;
+    border-radius:6px;
+    font-size:12px;
+    border:1px solid #e2e8f0;
+}
+
+.car-case{
+    background:#fff7ed;
+    border-left:3px solid #f97316;
+}
+
+.car-badge{
+    background:#f97316;
+    color:white;
+    padding:2px 6px;
+    font-size:10px;
+    border-radius:4px;
+    margin-left:5px;
+}
+
+.delete-case{
+    background:#dc2626;
+    border:none;
+    color:white;
+    padding:3px 6px;
+    font-size:10px;
+    margin-top:4px;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+/* ===== DASHBOARD TITLE ===== */
+
+.dashboard-title{
+    text-align:center;
+    font-size:22px;
+    font-weight:600;
+    margin:0 auto 22px auto;
+    color:#000;           /* Black text */
+    letter-spacing:0.3px;
+}
+
+</style>
+</head>
+<body>
+
+
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+<h2>Engineers Present Today</h2>
+
+<select id="addPresentDropdown"></select>
+<button onclick="addPresentEngineer()">Add</button>
+
+<button onclick="resetPresentEngineers()"
+        style="margin-top:10px;background:#dc2626;color:white;width:100%;">
+    Reset Present Engineers
+</button>
+
+<div id="presentList" style="margin-top:20px;"></div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+<h1 class="dashboard-title">
+    Engineer Case Assignment Dashboard
+</h1>
+
+<div class="top-banner">
+    <div id="sevCounter" class="sev-counter">SEV-1 Active: 0</div>
+    <span id="amsCount">AMS: 0</span>
+    <span id="apjCount">APJ: 0</span>
+    <span id="emeaCount">EMEA: 0</span>
+    <div id="istClock" class="ist-clock" style="margin-left:auto;"></div>
+</div>
+
+<div class="controls">
+    <select id="levelFilter" onchange="render()">
+        <option value="ALL">All Engineers</option>
+        <option value="L1">L1 Engineers</option>
+        <option value="L2">L2 Engineers</option>
+    </select>
+
+    <input type="text" id="caseId" placeholder="Case ID">
+
+    <select id="region" onchange="render()">
+        <option>AMS</option>
+        <option>APJ</option>
+        <option>EMEA</option>
+    </select>
+
+    <select id="severity">
+        <option>SEV-1</option>
+        <option>SEV-2</option>
+        <option>SEV-3</option>
+    </select>
+
+    <select id="assignEngineer"></select>
+
+<label style="display:flex;align-items:center;gap:5px;">
+    <input type="checkbox" id="isCarCase">
+    CAR Case
+</label>
+
+    <button onclick="addCase()">Assign Case</button>
+
+    <!-- NEW BUTTONS -->
+    <button onclick="exportToExcel()">Export to Excel</button>
+    <button onclick="resetAllData()" style="background:#b91c1c;color:white;">
+        Reset All Data
+    </button>
+</div>
+
+<div class="dashboard" id="dashboard"></div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCCi6dG07IJy19V-lP94wp8rcmAWhMqaJk",
+  authDomain: "gswdashboard.firebaseapp.com",
+  databaseURL: "https://gswdashboard-default-rtdb.firebaseio.com",
+  projectId: "gswdashboard",
+  storageBucket: "gswdashboard.firebasestorage.app",
+  messagingSenderId: "780004848260",
+  appId: "1:780004848260:web:098096a1892ffb26e688d1",
+  measurementId: "G-HGN81N3RYS"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+
+/* ===== FIREBASE REALTIME SYNC ===== */
+
+let presentEngineers = [];
+let cases = [];
+let engineerStatus = {};
+
+db.ref("presentEngineers").on("value", (snapshot) => {
+    presentEngineers = snapshot.val() || [];
+    render();
+});
+
+db.ref("engineerStatus").on("value", (snapshot) => {
+    engineerStatus = snapshot.val() || {};
+    render();
+});
+
+db.ref("cases").on("value", (snapshot) => {
+    cases = snapshot.val() || [];
+    render();
+});
+
+
+/* ===== LIVE IST CLOCK ===== */
+function updateISTClock(){
+    const now = new Date().toLocaleString("en-IN",{
+        timeZone:"Asia/Kolkata",
+        hour12:false
+    });
+    document.getElementById("istClock").innerText="IST Time: "+now;
+}
+setInterval(updateISTClock,1000);
+updateISTClock();
+
+
+/* ===== AUTO RESET AT 6:00 AM IST ===== */
+
+let lastResetDate = localStorage.getItem("lastResetDate") || null;
+
+function checkDailyReset(){
+    const now = new Date();
+    const istTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
+
+    const hours = istTime.getHours();
+    const minutes = istTime.getMinutes();
+    const todayDate = istTime.toISOString().split("T")[0];
+
+    // If 6:00 AM IST and not already reset today
+    if(hours === 6 && minutes === 0 && lastResetDate !== todayDate){
+        
+        // Clear all cases
+cases = [];
+db.ref("cases").set([]);
+
+        // Mark reset done for today
+        lastResetDate = todayDate;
+        localStorage.setItem("lastResetDate", todayDate);
+
+        alert("✅ Dashboard counters reset for new day (6:00 AM IST)");
+    }
+}
+
+// Check every 30 seconds
+setInterval(checkDailyReset, 30000);
+
+/* ===== MASTER ENGINEERS ===== */
+const masterEngineers = [
+{level:"L1", name:"Aaditya", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Aayush", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Namneet", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Devyani", shift:"5:30 AM - 2:30 PM", region:"APJ"},
+{level:"L1", name:"Ashish", shift:"11:00 AM - 8:00 PM", region:"APJ"},
+{level:"L1", name:"Tanisha N", shift:"11:00 AM - 8:00 PM", region:"APJ"},
+{level:"L1", name:"Avinash", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Vrushali", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Yashaswini", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Avleen", shift:"3:00 PM - 12:00 AM", region:"EMEA"},
+{level:"L1", name:"Vansh", shift:"1:30 PM - 10:30 PM", region:"AMS"},
+{level:"L1", name:"Mayank", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Sakshi", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Swarupa", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Prabhnoor", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Shafiya", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Shefali", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Navya", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Akshay", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L1", name:"Sufiyan", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Afsan", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Abhilash", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Rudrani", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Anubhav", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Tanisha K", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L1", name:"Suraj", shift:"9:00 PM - 6:00 AM", region:"AMS"},
+{level:"L2", name:"Prasenjit", shift:"1:30 PM - 10:30 PM", region:"AMS"},
+{level:"L2", name:"Isha", shift:"5:00 PM - 2:00 AM", region:"AMS"},
+{level:"L2", name:"Keith", shift:"9:00 PM - 6:00 AM", region:"AMS"}
+];
+
+
+function toggleStatus(name, type, duration = null){
+
+    const now = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    }) + " IST";
+
+    if(type === "oncall"){
+
+        if(engineerStatus[name]?.type === "oncall"){
+            delete engineerStatus[name];
+        } else {
+            engineerStatus[name] = {
+                type: "oncall",
+                since: now
+            };
+        }
+
+    }
+
+if(type === "onbreak"){
+
+    if(duration === null){
+        delete engineerStatus[name];
+    } else {
+        engineerStatus[name] = {
+            type: "onbreak",
+            duration: duration,
+            since: now
+        };
+    }
+}
+
+    db.ref("engineerStatus").set(engineerStatus);
+}
+/* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
+function getNextRecommended(region, levelFilter){
+
+    const eligible = masterEngineers.filter(e =>
+        presentEngineers.includes(e.name) &&
+        !engineerStatus[e.name] &&   // ✅ skip anyone with status
+        e.region === region &&
+        (levelFilter === "ALL" || e.level === levelFilter)
+    );
+
+    if(eligible.length === 0) return null;
+
+    let minCases = Infinity;
+    let recommended = null;
+
+    eligible.forEach(e => {
+        const count = cases.filter(c => c.engineer === e.name).length;
+        if(count < minCases){
+            minCases = count;
+            recommended = e.name;
+        }
+    });
+
+    return recommended;
+}
+
+function addCase(){
+
+    const caseId = document.getElementById("caseId").value.trim();
+    const region = document.getElementById("region").value;
+    const severity = document.getElementById("severity").value;
+    const engineer = document.getElementById("assignEngineer").value;
+    const isCar = document.getElementById("isCarCase").checked;
+
+    if(!caseId || !engineer){
+        alert("Enter Case ID & Engineer");
+        return;
+    }
+
+    if(cases.some(c => c.caseId === caseId)){
+        alert("Case ID already exists!");
+        return;
+    }
+
+    // ✅ Get engineer details properly
+    const engineerDetails = masterEngineers.find(e => e.name === engineer);
+    const level = engineerDetails ? engineerDetails.level : "";
+
+    const newCase = {
+        caseId,
+        region,
+        severity,
+        engineer,
+        level,
+        isCar,
+        time: new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
+    };
+
+    cases.push(newCase);
+    db.ref("cases").set(cases);
+
+    // Clear fields
+    document.getElementById("caseId").value = "";
+    document.getElementById("isCarCase").checked = false;
+    document.getElementById("caseId").focus();
+}
+
+function addPresentEngineer(){
+
+    const name = document.getElementById("addPresentDropdown").value;
+
+    if(!name) return;
+
+    // ✅ If Select All chosen
+    if(name === "__ALL__"){
+
+        masterEngineers.forEach(e=>{
+            if(!presentEngineers.includes(e.name)){
+                presentEngineers.push(e.name);
+            }
+        });
+
+    } else {
+
+        if(!presentEngineers.includes(name)){
+            presentEngineers.push(name);
+        }
+    }
+
+    db.ref("presentEngineers").set(presentEngineers);
+}
+
+function removePresent(name){
+    presentEngineers=presentEngineers.filter(e=>e!==name);
+    db.ref("presentEngineers").set(presentEngineers);
+}
+
+function deleteCase(caseId){
+
+    if(!confirm("⚠ Remove case: "+caseId+" ?")) return;
+
+    cases = cases.filter(c=>c.caseId!==caseId);
+
+    db.ref("cases").set(cases);
+}
+
+function populateDropdowns(){
+
+    const masterDD = document.getElementById("addPresentDropdown");
+    const assignDD = document.getElementById("assignEngineer");
+
+    const levelFilter = document.getElementById("levelFilter").value;
+    const regionSelected = document.getElementById("region").value;
+    const nextEngineer = getNextRecommended(regionSelected, levelFilter);
+
+    masterDD.innerHTML = `
+        <option value=''>Select Engineer</option>
+        <option value='__ALL__'>Select All Engineers</option>
+    `;
+
+    assignDD.innerHTML = "";
+
+    // ===== Add Recommended Engineer FIRST =====
+    if(nextEngineer){
+assignDD.innerHTML += `
+    <option value="${nextEngineer}" selected class="recommended-option">
+        ${nextEngineer} ⭐ (Recommended)
+    </option>
+`;
+    }
+
+    // ===== Add Other Present Engineers =====
+    masterEngineers.forEach(e => {
+
+        if(!presentEngineers.includes(e.name)){
+            masterDD.innerHTML += `
+                <option value="${e.name}">
+                    ${e.name} (${e.level} - ${e.region})
+                </option>
+            `;
+        }
+
+        if(presentEngineers.includes(e.name) && e.name !== nextEngineer){
+            assignDD.innerHTML += `
+                <option value="${e.name}">
+                    ${e.name}
+                </option>
+            `;
+        }
+    });
+}
+
+function render(){
+
+    const dashboard = document.getElementById("dashboard");
+    const presentList = document.getElementById("presentList");
+    const levelFilter = document.getElementById("levelFilter").value;
+    const regionSelected = document.getElementById("region").value;
+    const nextEngineer = getNextRecommended(regionSelected, levelFilter);
+
+    dashboard.innerHTML = "";
+    presentList.innerHTML = "";
+
+    let sev1 = 0, ams = 0, apj = 0, emea = 0;
+
+    masterEngineers.forEach(e => {
+
+        if(levelFilter !== "ALL" && e.level !== levelFilter) return;
+
+        const isPresent = presentEngineers.includes(e.name);
+        const engCases = cases.filter(c => c.engineer === e.name);
+        const normalCases = engCases.filter(c => !c.isCar);
+        const carCases = engCases.filter(c => c.isCar);
+        const hasSev1 = engCases.some(c => c.severity === "SEV-1");
+        const status = engineerStatus[e.name];
+
+        engCases.forEach(c => {
+            if(c.severity === "SEV-1") sev1++;
+            if(c.region === "AMS") ams++;
+            if(c.region === "APJ") apj++;
+            if(c.region === "EMEA") emea++;
+        });
+
+        // ===== SIDEBAR =====
+        if(isPresent){
+            presentList.innerHTML += `
+                <div class="present-engineer">
+                    <strong>${e.name}</strong><br>
+                    Region: ${e.region}<br>
+                    Shift: ${e.shift}
+                    <button class="remove-btn"
+                        onclick="removePresent('${e.name}')">X</button>
+                </div>
+            `;
+        }
+
+        // ===== CARD CLASS =====
+        let cardClass = "engineer-card";
+        if(status?.type === "oncall") cardClass += " oncall";
+        if(status?.type === "onbreak") cardClass += " onbreak";
+        if(!isPresent) cardClass += " absent";
+        if(isPresent && hasSev1) cardClass += " red";
+        if(e.name === nextEngineer) cardClass += " next";
+
+        dashboard.innerHTML += `
+        <div class="flip-card ${cardClass}">
+            <div class="flip-inner">
+
+                <!-- FRONT -->
+                <div class="flip-front">
+
+                    ${!isPresent 
+                        ? '<div class="not-present-badge">Not Present Today</div>' 
+                        : (hasSev1 ? '<div class="badge">SEV-1 ACTIVE</div>' : '')
+                    }
+
+                    <h3>${e.name}</h3>
+
+                    ${status?.type === "oncall" 
+                        ? `<div class="oncall-badge" style="margin-bottom:6px;">
+                            📞 On Call 
+                            <small style="margin-left:6px;font-weight:400;">
+                                since ${status.since}
+                            </small>
+                           </div>`
+                        : ''
+                    }
+
+                    ${status?.type === "onbreak" 
+                        ? `<div class="onbreak-badge" style="margin-bottom:6px;">
+                            ☕ On Break (${status.duration} mins)
+                            <small style="margin-left:6px;font-weight:400;">
+                                since ${status.since}
+                            </small>
+                           </div>`
+                        : ''
+                    }
+
+                    <p><strong>Region:</strong> ${e.region}</p>
+                    <p><strong>Shift:</strong> ${e.shift}</p>
+                    <p><strong>Active Cases:</strong> ${engCases.length}</p>
+                    <small>Hover to view cases</small>
+
+                </div>
+
+                <!-- BACK -->
+                <div class="flip-back">
+                    <h3>${e.name} - Assigned Cases</h3>
+
+                    ${isPresent ? `
+                    <div style="margin:10px 0 15px 0; display:flex; flex-direction:column; gap:8px;">
+
+                        <!-- STATUS TIMESTAMP -->
+                        ${status ? `
+                            <div style="
+                                font-size:11px;
+                                padding:6px 8px;
+                                border-radius:6px;
+                                background:${status.type === "oncall" ? '#fff7ed' : '#e0f2fe'};
+                                color:${status.type === "oncall" ? '#c2410c' : '#075985'};
+                                font-weight:500;
+                                text-align:center;
+                            ">
+                                ${status.type === "oncall" 
+                                    ? "📞 On Call since " 
+                                    : `☕ On Break (${status.duration} mins) since `}
+                                ${status.since}
+                            </div>
+                        ` : ""}
+
+                        <!-- STATUS BUTTON ROW -->
+                        <div style="display:flex;gap:8px;align-items:stretch;">
+
+                            <!-- ON CALL -->
+                            <div style="
+                                flex:1;
+                                min-height:34px;
+                                padding:6px 8px;
+                                border-radius:6px;
+                                background:${status?.type === "oncall" ? '#fff7ed' : '#f8fafc'};
+                                border:1px solid ${status?.type === "oncall" ? '#f97316' : '#e2e8f0'};
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                gap:6px;
+                                font-size:12px;
+                                cursor:pointer;
+                            ">
+                                <input type="checkbox"
+                                    ${status?.type === "oncall" ? "checked" : ""}
+                                    onclick="event.stopPropagation(); toggleStatus('${e.name}','oncall')">
+                                <span>📞 On Call</span>
+                            </div>
+
+                            <!-- ON BREAK DROPDOWN -->
+                            <div style="
+                                flex:1;
+                                padding:6px 8px;
+                                border-radius:6px;
+                                background:${status?.type === "onbreak" ? '#e0f2fe' : '#f8fafc'};
+                                border:1px solid ${status?.type === "onbreak" ? '#0284c7' : '#e2e8f0'};
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                gap:6px;
+                                font-size:12px;
+                            ">
+
+                                <span style="font-weight:600;color:#0284c7;">☕</span>
+
+                                <select 
+                                    style="font-size:11px;padding:3px 6px;border-radius:4px;"
+                                    onclick="event.stopPropagation();"
+                                    onchange="
+                                        event.stopPropagation();
+                                        const val = this.value;
+                                        if(val === ''){
+                                            toggleStatus('${e.name}','onbreak',null);
+                                        } else {
+                                            toggleStatus('${e.name}','onbreak',parseInt(val));
+                                        }
+                                    "
+                                >
+                                    <option value="">Break</option>
+                                    <option value="15"
+                                        ${status?.type === "onbreak" && status?.duration === 15 ? "selected" : ""}>
+                                        15 mins
+                                    </option>
+                                    <option value="30"
+                                        ${status?.type === "onbreak" && status?.duration === 30 ? "selected" : ""}>
+                                        30 mins
+                                    </option>
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                    ` : ""}
+
+                    ${carCases.length > 0 ? `
+                        <h4 style="color:#f97316;">CAR Cases</h4>
+                        ${carCases.map(c => `
+                            <div class="case car-case">
+                                <strong>${c.caseId}</strong>
+                                <span class="car-badge">CAR</span><br>
+                                ${c.region} | ${c.severity}<br>
+                                ${c.time}<br>
+                                <button class="delete-case"
+                                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                                    Remove Case
+                                </button>
+                            </div>
+                        `).join("")}
+                    ` : ""}
+
+                    ${normalCases.length > 0 ? `
+                        <h4>Regular Cases</h4>
+                        ${normalCases.map(c => `
+                            <div class="case">
+                                <strong>${c.caseId}</strong><br>
+                                ${c.region} | ${c.severity}<br>
+                                ${c.time}<br>
+                                <button class="delete-case"
+                                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                                    Remove Case
+                                </button>
+                            </div>
+                        `).join("")}
+                    ` : ""}
+
+                    ${(normalCases.length === 0 && carCases.length === 0)
+                        ? "<p>No assigned cases</p>"
+                        : ""
+                    }
+
+                </div>
+
+            </div>
+        </div>
+        `;
+    });
+
+    document.getElementById("sevCounter").textContent =
+        "SEV-1 Active: " + sev1;
+
+    document.getElementById("sevCounter").className =
+        "sev-counter " + (sev1 > 0 ? "sev-active" : "");
+
+    document.getElementById("amsCount").textContent = "AMS: " + ams;
+    document.getElementById("apjCount").textContent = "APJ: " + apj;
+    document.getElementById("emeaCount").textContent = "EMEA: " + emea;
+
+    populateDropdowns();
+}
+/* ===== EXPORT TO EXCEL (UPDATED WITH CASE TYPE) ===== */
+function exportToExcel(){
+
+    if(cases.length === 0){
+        alert("No data to export.");
+        return;
+    }
+
+    let csvContent = "Case ID,Engineer,Level,Region,Severity,Assigned Time,Case Type\n";
+
+    cases.forEach(c=>{
+
+        const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
+        const level = engineerDetails ? engineerDetails.level : "";
+        const caseType = c.isCar ? "CAR" : "Regular";
+
+        // ✅ Force Case ID as TEXT
+        csvContent += `="${c.caseId}",${c.engineer},${level},${c.region},${c.severity},"${c.time}",${caseType}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Engineer_Case_Dashboard_Data.csv";
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+/* ===== AUTO EXPORT EVERY 1 HOUR ===== */
+
+function autoExportHourly(){
+
+    if(cases.length === 0 && Object.keys(engineerStatus).length === 0){
+        console.log("No data to export.");
+        return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+
+    // ======================
+    // SHEET 1: CASES
+    // ======================
+    const caseData = cases.map(c => {
+
+        const engineerDetails = masterEngineers.find(e => e.name === c.engineer);
+        const level = engineerDetails ? engineerDetails.level : "";
+        const caseType = c.isCar ? "CAR" : "Regular";
+
+        return {
+            "Case ID": c.caseId,
+            "Engineer": c.engineer,
+            "Level": level,
+            "Region": c.region,
+            "Severity": c.severity,
+            "Assigned Time": c.time,
+            "Case Type": caseType
+        };
+    });
+
+    const caseSheet = XLSX.utils.json_to_sheet(caseData);
+    XLSX.utils.book_append_sheet(workbook, caseSheet, "Cases");
+
+    // ======================
+    // SHEET 2: ENGINEER STATUS
+    // ======================
+    const statusData = Object.keys(engineerStatus).map(name => {
+
+        const status = engineerStatus[name];
+
+        return {
+            "Engineer": name,
+            "Status": status.type === "oncall" ? "On Call" : "On Break",
+            "Break Duration (mins)": status.duration || "",
+            "Since": status.since
+        };
+    });
+
+    const statusSheet = XLSX.utils.json_to_sheet(statusData);
+    XLSX.utils.book_append_sheet(workbook, statusSheet, "Engineer Status");
+
+    // ======================
+    // DOWNLOAD FILE
+    // ======================
+    const now = new Date().toLocaleString("en-IN", {timeZone:"Asia/Kolkata"})
+        .replace(/[\/,: ]/g,"-");
+
+    XLSX.writeFile(workbook, `Dashboard_Backup_${now}.xlsx`);
+
+    console.log("Hourly Excel backup exported at", now);
+}
+/* ===== RESET ALL DATA ===== */
+function resetAllData(){
+
+    if(!confirm("⚠ This will completely reset the dashboard. Continue?"))
+        return;
+
+    // Clear local variables immediately
+    cases = [];
+    presentEngineers = [];
+    engineerStatus = {};
+
+    // Clear Firebase completely in ONE atomic update
+    db.ref().set({
+        cases: [],
+        presentEngineers: [],
+        engineerStatus: {}
+    });
+
+    alert("Dashboard fully reset.");
+
+    render(); // Force immediate UI refresh
+}
+
+    /* ===== RESET ONLY PRESENT ENGINEERS ===== */
+function resetPresentEngineers(){
+
+    if(!confirm("⚠ This will remove all Engineers marked as Present Today. Continue?"))
+        return;
+
+    db.ref("presentEngineers").set([]);
+
+    alert("Present Engineers list has been reset.");
+}
+
+/* ===== START HOURLY AUTO EXPORT ===== */
+
+// Run every 1 hour (3600000 milliseconds)
+setInterval(autoExportHourly, 3600000);
+
+</script>
+</body>
+
 </html>
+
