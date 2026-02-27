@@ -1092,68 +1092,6 @@ function exportToExcel(){
     URL.revokeObjectURL(url);
 }
 
-/* ===== AUTO EXPORT EVERY 1 HOUR ===== */
-
-function autoExportHourly(){
-
-    if(cases.length === 0 && Object.keys(engineerStatus).length === 0){
-        console.log("No data to export.");
-        return;
-    }
-
-    const workbook = XLSX.utils.book_new();
-
-    // ======================
-    // SHEET 1: CASES
-    // ======================
-    const caseData = cases.map(c => {
-
-        const engineerDetails = masterEngineers.find(e => e.name === c.engineer);
-        const level = engineerDetails ? engineerDetails.level : "";
-        const caseType = c.isCar ? "CAR" : "Regular";
-
-        return {
-            "Case ID": c.caseId,
-            "Engineer": c.engineer,
-            "Level": level,
-            "Region": c.region,
-            "Severity": c.severity,
-            "Assigned Time": c.time,
-            "Case Type": caseType
-        };
-    });
-
-    const caseSheet = XLSX.utils.json_to_sheet(caseData);
-    XLSX.utils.book_append_sheet(workbook, caseSheet, "Cases");
-
-    // ======================
-    // SHEET 2: ENGINEER STATUS
-    // ======================
-    const statusData = Object.keys(engineerStatus).map(name => {
-
-        const status = engineerStatus[name];
-
-        return {
-            "Engineer": name,
-            "Status": status.type === "oncall" ? "On Call" : "On Break",
-            "Break Duration (mins)": status.duration || "",
-            "Since": status.since
-        };
-    });
-
-    const statusSheet = XLSX.utils.json_to_sheet(statusData);
-    XLSX.utils.book_append_sheet(workbook, statusSheet, "Engineer Status");
-
-    // ======================
-    // DOWNLOAD FILE
-    // ======================
-    const now = new Date().toLocaleString("en-IN", {timeZone:"Asia/Kolkata"})
-        .replace(/[\/,: ]/g,"-");
-
-    XLSX.writeFile(workbook, `Dashboard_Backup_${now}.xlsx`);
-
-    console.log("Hourly Excel backup exported at", now);
-}
 /* ===== RESET ALL DATA ===== */
 function resetAllData(){
 
