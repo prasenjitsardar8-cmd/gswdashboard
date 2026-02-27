@@ -103,6 +103,17 @@ body {
     border-radius:4px;
 }
 
+.engineer-card.next .flip-front{
+    background:#dcfce7;
+    border:2px solid #16a34a;
+    animation:nextGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes nextGlow{
+    from{ box-shadow:0 0 6px rgba(22,163,74,0.35); }
+    to{ box-shadow:0 0 18px rgba(22,163,74,0.7); }
+}
+
 /* ===== MAIN ===== */
 .main{
     flex:1;
@@ -195,7 +206,7 @@ button:hover{
 .flip-inner{
     position:relative;
     width:100%;
-    height:230px;
+    height:260px;   /* increased */
     transition:transform 0.6s;
     transform-style:preserve-3d;
 }
@@ -205,6 +216,7 @@ button:hover{
     width:100%;
     height:100%;
     backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;   /* 👈 add this line */
     border-radius:12px;
     padding:14px;
     box-shadow:0 6px 18px rgba(0,0,0,0.05);
@@ -231,6 +243,14 @@ button:hover{
     margin:4px 0;
 }
 
+/* Make front card vertical layout */
+.flip-front{
+    background:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;   /* important */
+}
+
 /* ===== BACK CARD ===== */
 .flip-back{
     background:white;
@@ -239,9 +259,67 @@ button:hover{
     font-size:13px;
 }
 
+.flip-back{
+    background:white;
+    transform:rotateY(180deg);
+    overflow-y:auto;
+    font-size:13px;
+    scrollbar-gutter: stable;   /* 👈 important */
+}
+
 /* ===== DISABLE FLIP FOR ABSENT ENGINEERS ===== */
 .engineer-card.absent:hover .flip-inner{
     transform: none !important;
+}
+
+/* ===== ON BREAK STATE ===== */
+.engineer-card.onbreak .flip-front{
+    background:#e0f2fe;
+    border:2px solid #0284c7;
+    box-shadow:0 0 12px rgba(2,132,199,0.45);
+    animation:onBreakGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes onBreakGlow{
+    from{ box-shadow:0 0 6px rgba(2,132,199,0.35); }
+    to{ box-shadow:0 0 18px rgba(2,132,199,0.7); }
+}
+
+.onbreak-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#0284c7;
+    color:white;
+    padding:4px 10px;
+    border-radius:16px;
+    font-size:12px;
+    font-weight:600;
+    margin-top:4px;
+}
+
+/* Subtle pulsing glow */
+@keyframes onCallGlow{
+    from{
+        box-shadow:0 0 8px rgba(249,115,22,0.35);
+    }
+    to{
+        box-shadow:0 0 18px rgba(249,115,22,0.6);
+    }
+}
+
+/* Phone + Text Badge (Always at Bottom of Content) */
+.oncall-badge{
+    display:inline-flex;          /* safer than flex */
+    align-items:center;
+    gap:6px;
+    background:#f97316;
+    color:white;
+    padding:4px 10px;
+    border-radius:16px;
+    font-size:12px;
+    font-weight:600;
+    margin-top:4px;               /* tight gap */
 }
 
 /* ===== STATUS STATES ===== */
@@ -444,15 +522,23 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <script>
 
 /* ===== FIREBASE REALTIME SYNC ===== */
 
 let presentEngineers = [];
 let cases = [];
+let engineerStatus = {};
 
 db.ref("presentEngineers").on("value", (snapshot) => {
     presentEngineers = snapshot.val() || [];
+    render();
+});
+
+db.ref("engineerStatus").on("value", (snapshot) => {
+    engineerStatus = snapshot.val() || {};
     render();
 });
 
@@ -460,6 +546,7 @@ db.ref("cases").on("value", (snapshot) => {
     cases = snapshot.val() || [];
     render();
 });
+
 
 /* ===== LIVE IST CLOCK ===== */
 function updateISTClock(){
@@ -539,20 +626,60 @@ const masterEngineers = [
 ];
 
 
-/* ===== SMART NEXT ENGINEER ===== */
+function toggleStatus(name, type, duration = null){
+
+    const now = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    }) + " IST";
+
+    if(type === "oncall"){
+
+        if(engineerStatus[name]?.type === "oncall"){
+            delete engineerStatus[name];
+        } else {
+            engineerStatus[name] = {
+                type: "oncall",
+                since: now
+            };
+        }
+
+    }
+
+if(type === "onbreak"){
+
+    if(duration === null){
+        delete engineerStatus[name];
+    } else {
+        engineerStatus[name] = {
+            type: "onbreak",
+            duration: duration,
+            since: now
+        };
+    }
+}
+
+    db.ref("engineerStatus").set(engineerStatus);
+}
+/* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
+
     const eligible = masterEngineers.filter(e =>
         presentEngineers.includes(e.name) &&
+        !engineerStatus[e.name] &&   // ✅ skip anyone with status
         e.region === region &&
-        (levelFilter==="ALL" || e.level===levelFilter)
+        (levelFilter === "ALL" || e.level === levelFilter)
     );
-    if(eligible.length===0) return null;
+
+    if(eligible.length === 0) return null;
 
     let minCases = Infinity;
     let recommended = null;
 
-    eligible.forEach(e=>{
-        const count = cases.filter(c=>c.engineer===e.name).length;
+    eligible.forEach(e => {
+        const count = cases.filter(c => c.engineer === e.name).length;
         if(count < minCases){
             minCases = count;
             recommended = e.name;
@@ -689,112 +816,246 @@ assignDD.innerHTML += `
 }
 
 function render(){
-    const dashboard=document.getElementById("dashboard");
-    const presentList=document.getElementById("presentList");
-    const levelFilter=document.getElementById("levelFilter").value;
-    const regionSelected=document.getElementById("region").value;
-    const nextEngineer=getNextRecommended(regionSelected, levelFilter);
 
-    dashboard.innerHTML="";
-    presentList.innerHTML="";
+    const dashboard = document.getElementById("dashboard");
+    const presentList = document.getElementById("presentList");
+    const levelFilter = document.getElementById("levelFilter").value;
+    const regionSelected = document.getElementById("region").value;
+    const nextEngineer = getNextRecommended(regionSelected, levelFilter);
 
-    let sev1=0,ams=0,apj=0,emea=0;
+    dashboard.innerHTML = "";
+    presentList.innerHTML = "";
 
-    masterEngineers.forEach(e=>{
-        if(levelFilter!=="ALL" && e.level!==levelFilter) return;
+    let sev1 = 0, ams = 0, apj = 0, emea = 0;
 
-        const isPresent=presentEngineers.includes(e.name);
-        const engCases=cases.filter(c=>c.engineer===e.name);
-        const normalCases = engCases.filter(c=>!c.isCar);
-        const carCases = engCases.filter(c=>c.isCar);
-        const hasSev1=engCases.some(c=>c.severity==="SEV-1");
+    masterEngineers.forEach(e => {
 
-        engCases.forEach(c=>{
-            if(c.severity==="SEV-1") sev1++;
-            if(c.region==="AMS") ams++;
-            if(c.region==="APJ") apj++;
-            if(c.region==="EMEA") emea++;
+        if(levelFilter !== "ALL" && e.level !== levelFilter) return;
+
+        const isPresent = presentEngineers.includes(e.name);
+        const engCases = cases.filter(c => c.engineer === e.name);
+        const normalCases = engCases.filter(c => !c.isCar);
+        const carCases = engCases.filter(c => c.isCar);
+        const hasSev1 = engCases.some(c => c.severity === "SEV-1");
+        const status = engineerStatus[e.name];
+
+        engCases.forEach(c => {
+            if(c.severity === "SEV-1") sev1++;
+            if(c.region === "AMS") ams++;
+            if(c.region === "APJ") apj++;
+            if(c.region === "EMEA") emea++;
         });
 
+        // ===== SIDEBAR =====
         if(isPresent){
-            presentList.innerHTML+=`
+            presentList.innerHTML += `
                 <div class="present-engineer">
                     <strong>${e.name}</strong><br>
-                            Region: ${e.region}<br>
-                            Shift: ${e.shift}
-                    <button class="remove-btn" onclick="removePresent('${e.name}')">X</button>
+                    Region: ${e.region}<br>
+                    Shift: ${e.shift}
+                    <button class="remove-btn"
+                        onclick="removePresent('${e.name}')">X</button>
                 </div>
             `;
         }
 
-        let cardClass="engineer-card";
-        if(!isPresent) cardClass+=" absent";
-        if(isPresent && hasSev1) cardClass+=" red";
-        if(e.name===nextEngineer) cardClass+=" next";
+        // ===== CARD CLASS =====
+        let cardClass = "engineer-card";
+        if(status?.type === "oncall") cardClass += " oncall";
+        if(status?.type === "onbreak") cardClass += " onbreak";
+        if(!isPresent) cardClass += " absent";
+        if(isPresent && hasSev1) cardClass += " red";
+        if(e.name === nextEngineer) cardClass += " next";
 
-        dashboard.innerHTML+=`
+        dashboard.innerHTML += `
         <div class="flip-card ${cardClass}">
             <div class="flip-inner">
-<div class="flip-front">
-    ${
-        !isPresent 
-        ? '<div class="not-present-badge">Not Present Today</div>' 
-        : (hasSev1 ? '<div class="badge">SEV-1 ACTIVE</div>' : '')
-    }
+
+                <!-- FRONT -->
+                <div class="flip-front">
+
+                    ${!isPresent 
+                        ? '<div class="not-present-badge">Not Present Today</div>' 
+                        : (hasSev1 ? '<div class="badge">SEV-1 ACTIVE</div>' : '')
+                    }
+
                     <h3>${e.name}</h3>
+
+                    ${status?.type === "oncall" 
+                        ? `<div class="oncall-badge" style="margin-bottom:6px;">
+                            📞 On Call 
+                            <small style="margin-left:6px;font-weight:400;">
+                                since ${status.since}
+                            </small>
+                           </div>`
+                        : ''
+                    }
+
+                    ${status?.type === "onbreak" 
+                        ? `<div class="onbreak-badge" style="margin-bottom:6px;">
+                            ☕ On Break (${status.duration} mins)
+                            <small style="margin-left:6px;font-weight:400;">
+                                since ${status.since}
+                            </small>
+                           </div>`
+                        : ''
+                    }
+
                     <p><strong>Region:</strong> ${e.region}</p>
                     <p><strong>Shift:</strong> ${e.shift}</p>
                     <p><strong>Active Cases:</strong> ${engCases.length}</p>
                     <small>Hover to view cases</small>
+
                 </div>
-<div class="flip-back">
-    <h3>${e.name} - Assigned Cases</h3>
 
+                <!-- BACK -->
+                <div class="flip-back">
+                    <h3>${e.name} - Assigned Cases</h3>
 
+                    ${isPresent ? `
+                    <div style="margin:10px 0 15px 0; display:flex; flex-direction:column; gap:8px;">
 
-    ${carCases.length > 0 ? `
-        <h4 style="color:#ff9800;">CAR Cases</h4>
-        ${carCases.map(c=>`
-            <div class="case car-case">
-                <strong>${c.caseId}</strong>
-                <span class="car-badge">CAR</span><br>
-                ${c.region} | ${c.severity}<br>
-                ${c.time}<br>
-                <button class="delete-case"
-                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
-                    Remove Case
-                </button>
-            </div>
-        `).join("")}
-    ` : ""}
+                        <!-- STATUS TIMESTAMP -->
+                        ${status ? `
+                            <div style="
+                                font-size:11px;
+                                padding:6px 8px;
+                                border-radius:6px;
+                                background:${status.type === "oncall" ? '#fff7ed' : '#e0f2fe'};
+                                color:${status.type === "oncall" ? '#c2410c' : '#075985'};
+                                font-weight:500;
+                                text-align:center;
+                            ">
+                                ${status.type === "oncall" 
+                                    ? "📞 On Call since " 
+                                    : `☕ On Break (${status.duration} mins) since `}
+                                ${status.since}
+                            </div>
+                        ` : ""}
 
-    ${normalCases.length > 0 ? `
-        <h4>Regular Cases</h4>
-        ${normalCases.map(c=>`
-            <div class="case">
-                <strong>${c.caseId}</strong><br>
-                ${c.region} | ${c.severity}<br>
-                ${c.time}<br>
-                <button class="delete-case"
-                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
-                    Remove Case
-                </button>
-            </div>
-        `).join("")}
-    ` : ""}
+                        <!-- STATUS BUTTON ROW -->
+                        <div style="display:flex;gap:8px;align-items:stretch;">
 
-    ${(normalCases.length===0 && carCases.length===0) ? "<p>No assigned cases</p>" : ""}
-</div>
+                            <!-- ON CALL -->
+                            <div style="
+                                flex:1;
+                                min-height:34px;
+                                padding:6px 8px;
+                                border-radius:6px;
+                                background:${status?.type === "oncall" ? '#fff7ed' : '#f8fafc'};
+                                border:1px solid ${status?.type === "oncall" ? '#f97316' : '#e2e8f0'};
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                gap:6px;
+                                font-size:12px;
+                                cursor:pointer;
+                            ">
+                                <input type="checkbox"
+                                    ${status?.type === "oncall" ? "checked" : ""}
+                                    onclick="event.stopPropagation(); toggleStatus('${e.name}','oncall')">
+                                <span>📞 On Call</span>
+                            </div>
+
+                            <!-- ON BREAK DROPDOWN -->
+                            <div style="
+                                flex:1;
+                                padding:6px 8px;
+                                border-radius:6px;
+                                background:${status?.type === "onbreak" ? '#e0f2fe' : '#f8fafc'};
+                                border:1px solid ${status?.type === "onbreak" ? '#0284c7' : '#e2e8f0'};
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                gap:6px;
+                                font-size:12px;
+                            ">
+
+                                <span style="font-weight:600;color:#0284c7;">☕</span>
+
+                                <select 
+                                    style="font-size:11px;padding:3px 6px;border-radius:4px;"
+                                    onclick="event.stopPropagation();"
+                                    onchange="
+                                        event.stopPropagation();
+                                        const val = this.value;
+                                        if(val === ''){
+                                            toggleStatus('${e.name}','onbreak',null);
+                                        } else {
+                                            toggleStatus('${e.name}','onbreak',parseInt(val));
+                                        }
+                                    "
+                                >
+                                    <option value="">Break</option>
+                                    <option value="15"
+                                        ${status?.type === "onbreak" && status?.duration === 15 ? "selected" : ""}>
+                                        15 mins
+                                    </option>
+                                    <option value="30"
+                                        ${status?.type === "onbreak" && status?.duration === 30 ? "selected" : ""}>
+                                        30 mins
+                                    </option>
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                    ` : ""}
+
+                    ${carCases.length > 0 ? `
+                        <h4 style="color:#f97316;">CAR Cases</h4>
+                        ${carCases.map(c => `
+                            <div class="case car-case">
+                                <strong>${c.caseId}</strong>
+                                <span class="car-badge">CAR</span><br>
+                                ${c.region} | ${c.severity}<br>
+                                ${c.time}<br>
+                                <button class="delete-case"
+                                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                                    Remove Case
+                                </button>
+                            </div>
+                        `).join("")}
+                    ` : ""}
+
+                    ${normalCases.length > 0 ? `
+                        <h4>Regular Cases</h4>
+                        ${normalCases.map(c => `
+                            <div class="case">
+                                <strong>${c.caseId}</strong><br>
+                                ${c.region} | ${c.severity}<br>
+                                ${c.time}<br>
+                                <button class="delete-case"
+                                    onclick="event.stopPropagation(); deleteCase('${c.caseId}')">
+                                    Remove Case
+                                </button>
+                            </div>
+                        `).join("")}
+                    ` : ""}
+
+                    ${(normalCases.length === 0 && carCases.length === 0)
+                        ? "<p>No assigned cases</p>"
+                        : ""
+                    }
+
+                </div>
+
             </div>
         </div>
         `;
     });
 
-    document.getElementById("sevCounter").textContent="SEV-1 Active: "+sev1;
-    document.getElementById("sevCounter").className="sev-counter "+(sev1>0?"sev-active":"");
-    document.getElementById("amsCount").textContent="AMS: "+ams;
-    document.getElementById("apjCount").textContent="APJ: "+apj;
-    document.getElementById("emeaCount").textContent="EMEA: "+emea;
+    document.getElementById("sevCounter").textContent =
+        "SEV-1 Active: " + sev1;
+
+    document.getElementById("sevCounter").className =
+        "sev-counter " + (sev1 > 0 ? "sev-active" : "");
+
+    document.getElementById("amsCount").textContent = "AMS: " + ams;
+    document.getElementById("apjCount").textContent = "APJ: " + apj;
+    document.getElementById("emeaCount").textContent = "EMEA: " + emea;
 
     populateDropdowns();
 }
@@ -835,47 +1096,85 @@ function exportToExcel(){
 
 function autoExportHourly(){
 
-    if(cases.length === 0){
-        console.log("No data to auto-export.");
+    if(cases.length === 0 && Object.keys(engineerStatus).length === 0){
+        console.log("No data to export.");
         return;
     }
 
-    let csvContent = "Case ID,Engineer,Level,Region,Severity,Assigned Time,Case Type\n";
+    const workbook = XLSX.utils.book_new();
 
-    cases.forEach(c=>{
-        const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
+    // ======================
+    // SHEET 1: CASES
+    // ======================
+    const caseData = cases.map(c => {
+
+        const engineerDetails = masterEngineers.find(e => e.name === c.engineer);
         const level = engineerDetails ? engineerDetails.level : "";
         const caseType = c.isCar ? "CAR" : "Regular";
 
-        csvContent += `${c.caseId},${c.engineer},${level},${c.region},${c.severity},${c.time},${caseType}\n`;
+        return {
+            "Case ID": c.caseId,
+            "Engineer": c.engineer,
+            "Level": level,
+            "Region": c.region,
+            "Severity": c.severity,
+            "Assigned Time": c.time,
+            "Case Type": caseType
+        };
     });
 
-    const now = new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})
-                .replace(/[\/,: ]/g,"-");
+    const caseSheet = XLSX.utils.json_to_sheet(caseData);
+    XLSX.utils.book_append_sheet(workbook, caseSheet, "Cases");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+    // ======================
+    // SHEET 2: ENGINEER STATUS
+    // ======================
+    const statusData = Object.keys(engineerStatus).map(name => {
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Dashboard_Backup_" + now + ".csv";
-    document.body.appendChild(a);
-    a.click();
+        const status = engineerStatus[name];
 
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+        return {
+            "Engineer": name,
+            "Status": status.type === "oncall" ? "On Call" : "On Break",
+            "Break Duration (mins)": status.duration || "",
+            "Since": status.since
+        };
+    });
 
-    console.log("Hourly backup exported at", now);
+    const statusSheet = XLSX.utils.json_to_sheet(statusData);
+    XLSX.utils.book_append_sheet(workbook, statusSheet, "Engineer Status");
+
+    // ======================
+    // DOWNLOAD FILE
+    // ======================
+    const now = new Date().toLocaleString("en-IN", {timeZone:"Asia/Kolkata"})
+        .replace(/[\/,: ]/g,"-");
+
+    XLSX.writeFile(workbook, `Dashboard_Backup_${now}.xlsx`);
+
+    console.log("Hourly Excel backup exported at", now);
 }
 /* ===== RESET ALL DATA ===== */
 function resetAllData(){
 
-    if(!confirm("⚠ This will delete ALL engineers present & ALL assigned cases. Continue?")) return;
+    if(!confirm("⚠ This will completely reset the dashboard. Continue?"))
+        return;
 
-    db.ref("cases").set([]);
-    db.ref("presentEngineers").set([]);
+    // Clear local variables immediately
+    cases = [];
+    presentEngineers = [];
+    engineerStatus = {};
 
-    alert("Dashboard data has been fully reset.");
+    // Clear Firebase completely in ONE atomic update
+    db.ref().set({
+        cases: [],
+        presentEngineers: [],
+        engineerStatus: {}
+    });
+
+    alert("Dashboard fully reset.");
+
+    render(); // Force immediate UI refresh
 }
 
     /* ===== RESET ONLY PRESENT ENGINEERS ===== */
