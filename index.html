@@ -5,111 +5,183 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { font-family: Arial; margin:0; background:#f4f6f9; display:flex; }
+
+/* ===== GLOBAL ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin:0;
+    background:#f1f5f9;
+    display:flex;
+    color:#1e293b;
+}
 
 /* ===== SIDEBAR ===== */
 .sidebar{
-    width:270px;
-    background:#1f2937;
-    color:white;
-    padding:20px;
+    width:260px;
+    background:#111827;
+    color:#e5e7eb;
+    padding:18px;
     min-height:100vh;
     overflow-y:auto;
 }
 
-.present-engineer{
-    background:rgba(255,255,255,0.1);
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:6px;
+.sidebar h2{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:15px;
+    letter-spacing:.3px;
+}
+
+/* ===== ENGINEER NAME STYLING ===== */
+
+/* Sidebar Present Engineer Name */
+.present-engineer strong{
+    font-weight:700;
     font-size:14px;
+    background:#1f2937;
+    padding:3px 8px;
+    border-radius:6px;
+    display:inline-block;
+}
+
+/* Front Card Name */
+.flip-front h3{
+    font-weight:700;
+    font-size:16px;
+    background:#e2e8f0;
+    padding:6px 10px;
+    border-radius:8px;
+    display:inline-block;
+}
+
+/* Back Card Name */
+.flip-back h3{
+    font-weight:700;
+    font-size:15px;
+    background:#e2e8f0;
+    padding:5px 10px;
+    border-radius:8px;
+    display:inline-block;
+}
+
+/* Present Engineer Card (Reduced Spacing) */
+.present-engineer{
+    background:rgba(255,255,255,0.06);
+    padding:8px 10px;
+    margin-bottom:8px;
+    border-radius:6px;
+    font-size:13px;
+    line-height:1.4;
     position:relative;
+    transition:.2s ease;
+}
+
+.present-engineer strong{
+    font-weight:600;
+    color:#ffffff;
+    background:rgba(255,255,255,0.08);
+    padding:2px 6px;
+    border-radius:4px;
+}
+
+.present-engineer:hover{
+    background:rgba(255,255,255,0.12);
 }
 
 .remove-btn{
     position:absolute;
-    right:8px;
-    top:8px;
-    background:red;
-    color:white;
+    right:6px;
+    top:6px;
+    background:#dc2626;
     border:none;
+    color:white;
     padding:2px 6px;
     cursor:pointer;
-    font-size:12px;
-}
-
-/* ===== RECOMMENDED OPTION GLOW ===== */
-
-@keyframes glowPulse {
-    0% {
-        background-color: #e8f5e9;
-        box-shadow: 0 0 5px #00c853;
-    }
-    50% {
-        background-color: #c8f7c5;
-        box-shadow: 0 0 12px #00c853;
-    }
-    100% {
-        background-color: #e8f5e9;
-        box-shadow: 0 0 5px #00c853;
-    }
-}
-
-.recommended-option {
-    font-weight: bold;
-    color: #00695c;
-    animation: glowPulse 1.8s infinite ease-in-out;
-}
-
-.car-case{
-    background:#fff3cd;
-    border-left:4px solid #ff9800;
-}
-
-.car-badge{
-    background:#ff9800;
-    color:white;
-    padding:2px 6px;
     font-size:11px;
     border-radius:4px;
-    margin-left:5px;
 }
 
 /* ===== MAIN ===== */
-.main{ flex:1; padding:20px; }
+.main{
+    flex:1;
+    padding:22px;
+}
 
+h1{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:18px;
+}
+
+/* ===== TOP BANNER ===== */
 .top-banner{
     display:flex;
     justify-content:space-between;
     align-items:center;
     background:white;
-    padding:15px;
-    border-radius:8px;
-    margin-bottom:20px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    padding:14px 18px;
+    border-radius:10px;
+    margin-bottom:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
 
-.banner-left{ display:flex; gap:20px; align-items:center; }
+.region-summary span{
+    margin-right:18px;
+    font-weight:500;
+}
 
-.sev-counter{ font-weight:bold; padding:8px 15px; border-radius:6px; }
-.sev-active{ background:red; color:white; }
+.sev-counter{
+    font-weight:600;
+    padding:6px 14px;
+    border-radius:6px;
+    background:#e2e8f0;
+}
 
-.region-summary span{ margin-right:15px; font-weight:bold; }
+.sev-active{
+    background:#dc2626;
+    color:white;
+}
 
-.ist-clock{ font-weight:bold; font-size:16px; }
+/* ===== CONTROLS ===== */
+.controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
 
-.controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+input, select{
+    padding:7px 10px;
+    border-radius:6px;
+    border:1px solid #e2e8f0;
+    font-size:13px;
+}
 
-input, select, button{ padding:8px; }
+button{
+    padding:7px 14px;
+    border-radius:6px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    font-weight:500;
+    cursor:pointer;
+    transition:.2s ease;
+}
 
+button:hover{
+    opacity:.9;
+}
+
+/* ===== DASHBOARD GRID ===== */
 .dashboard{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-    gap:15px;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:14px;
 }
 
 /* ===== FLIP CARD SYSTEM ===== */
-
 .flip-card{
     perspective:1000px;
 }
@@ -121,7 +193,7 @@ input, select, button{ padding:8px; }
 .flip-inner{
     position:relative;
     width:100%;
-    height:260px;
+    height:230px;
     transition:transform 0.6s;
     transform-style:preserve-3d;
 }
@@ -131,66 +203,114 @@ input, select, button{ padding:8px; }
     width:100%;
     height:100%;
     backface-visibility:hidden;
-    border-radius:10px;
-    padding:15px;
-    box-shadow:0 3px 8px rgba(0,0,0,0.1);
+    border-radius:12px;
+    padding:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.05);
 }
 
+/* ===== FRONT CARD ===== */
 .flip-front{
     background:white;
 }
 
+/* Subtle Name Highlight */
+.flip-front h3{
+    font-size:15px;
+    font-weight:600;
+    margin-bottom:6px;
+    padding:4px 8px;
+    background:#f1f5f9;
+    border-radius:6px;
+    display:inline-block;
+}
+
+.flip-front p{
+    font-size:13px;
+    margin:4px 0;
+}
+
+/* ===== BACK CARD ===== */
 .flip-back{
     background:white;
     transform:rotateY(180deg);
     overflow-y:auto;
+    font-size:13px;
 }
 
-/* ===== EXISTING STATES APPLIED TO FRONT ONLY ===== */
-
+/* ===== STATUS STATES ===== */
 .engineer-card.red .flip-front{
-    background:#ffdddd;
-    border:2px solid red;
+    background:#fee2e2;
+    border:1px solid #dc2626;
 }
 
 .engineer-card.absent .flip-front{
-    background:#3a3a3a;
-    color:#ccc;
+    background:#e5e7eb;
+    color:#9ca3af;
 }
 
 .engineer-card.next .flip-front{
-    border:3px solid #00c853;
-    background:#e8f5e9;
+    border:2px solid #22c55e;
+    background:#ecfdf5;
 }
 
+/* ===== BADGES ===== */
 .badge{
     position:absolute;
     top:10px;
     right:10px;
-    background:red;
+    background:#dc2626;
     color:white;
-    padding:3px 6px;
-    font-size:12px;
+    padding:3px 7px;
+    font-size:11px;
     border-radius:5px;
 }
 
+/* ===== CASE STYLING ===== */
 .case{
-    background:#f0f0f0;
-    margin:5px 0;
+    background:#f8fafc;
+    margin:6px 0;
     padding:8px;
-    border-radius:5px;
-    font-size:14px;
+    border-radius:6px;
+    font-size:12px;
+    border:1px solid #e2e8f0;
+}
+
+.car-case{
+    background:#fff7ed;
+    border-left:3px solid #f97316;
+}
+
+.car-badge{
+    background:#f97316;
+    color:white;
+    padding:2px 6px;
+    font-size:10px;
+    border-radius:4px;
+    margin-left:5px;
 }
 
 .delete-case{
-    background:red;
-    color:white;
+    background:#dc2626;
     border:none;
+    color:white;
     padding:3px 6px;
-    font-size:11px;
+    font-size:10px;
+    margin-top:4px;
+    border-radius:4px;
     cursor:pointer;
-    margin-top:5px;
 }
+
+/* ===== DASHBOARD TITLE ===== */
+
+.dashboard-title{
+    text-align:center;
+    font-size:22px;
+    font-weight:600;
+    margin:0 auto 22px auto;
+    color:#000;           /* Black text */
+    letter-spacing:0.3px;
+}
+
 </style>
 </head>
 <body>
@@ -215,7 +335,9 @@ input, select, button{ padding:8px; }
 <!-- ===== MAIN ===== -->
 <div class="main">
 
-<h1>Engineer Case Assignment Dashboard</h1>
+<h1 class="dashboard-title">
+    Engineer Case Assignment Dashboard
+</h1>
 
 <div class="top-banner">
     <div class="banner-left">
