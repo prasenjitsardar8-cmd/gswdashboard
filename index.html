@@ -118,25 +118,27 @@ h1{
 /* ===== TOP BANNER ===== */
 .top-banner{
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    gap:30px;
     background:white;
     padding:14px 18px;
     border-radius:10px;
     margin-bottom:18px;
     box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    flex-wrap:nowrap;      /* Prevent wrapping */
 }
 
+/* Make everything inline */
+.sev-counter,
 .region-summary span{
-    margin-right:18px;
-    font-weight:500;
+    display:inline-block;
 }
 
-.sev-counter{
-    font-weight:600;
-    padding:6px 14px;
-    border-radius:6px;
-    background:#e2e8f0;
+/* Remove extra spacing issue */
+.region-summary{
+    display:flex;
+    gap:25px;
+    margin:0;
 }
 
 .sev-active{
@@ -340,15 +342,11 @@ button:hover{
 </h1>
 
 <div class="top-banner">
-    <div class="banner-left">
-        <div id="sevCounter" class="sev-counter">SEV-1 Active: 0</div>
-        <div class="region-summary">
-            <span id="amsCount">AMS: 0</span>
-            <span id="apjCount">APJ: 0</span>
-            <span id="emeaCount">EMEA: 0</span>
-        </div>
-    </div>
-    <div id="istClock" class="ist-clock"></div>
+    <div id="sevCounter" class="sev-counter">SEV-1 Active: 0</div>
+    <span id="amsCount">AMS: 0</span>
+    <span id="apjCount">APJ: 0</span>
+    <span id="emeaCount">EMEA: 0</span>
+    <div id="istClock" class="ist-clock" style="margin-left:auto;"></div>
 </div>
 
 <div class="controls">
