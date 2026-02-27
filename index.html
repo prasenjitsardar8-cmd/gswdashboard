@@ -1190,9 +1190,10 @@ function resetPresentEngineers(){
 
 /* ===== START HOURLY AUTO EXPORT ===== */
 
-// Run every 1 hour (3600000 milliseconds)
-setInterval(autoExportHourly, 3600000);
+// Run once after 10 seconds (allow Firebase to load)
+setTimeout(autoExportHourly, 10000);
 
+// Then run every 10 minutes
+setInterval(autoExportHourly, 600000);
 </script>
 </body>
-
