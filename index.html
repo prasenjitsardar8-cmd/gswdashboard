@@ -492,7 +492,6 @@ button:hover{
     <button onclick="addCase()">Assign Case</button>
 
     <!-- NEW BUTTONS -->
-    <button onclick="exportToExcel()">Export to Excel</button>
     <button onclick="resetAllData()" style="background:#b91c1c;color:white;">
         Reset All Data
     </button>
@@ -1117,21 +1116,12 @@ function resetAllData(){
 
     /* ===== RESET ONLY PRESENT ENGINEERS ===== */
 function resetPresentEngineers(){
-
     if(!confirm("⚠ This will remove all Engineers marked as Present Today. Continue?"))
         return;
 
     db.ref("presentEngineers").set([]);
-
     alert("Present Engineers list has been reset.");
 }
 
-/* ===== START HOURLY AUTO EXPORT ===== */
-
-// Run once after 10 seconds (allow Firebase to load)
-setTimeout(autoExportHourly, 10000);
-
-// Then run every 10 minutes
-setInterval(autoExportHourly, 600000);
 </script>
 </body>
