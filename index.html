@@ -1070,11 +1070,10 @@ function exportToExcel(){
 
     cases.forEach(c=>{
 
-        const engineerDetails = masterEngineers.find(e=>e.name===c.engineer);
-        const level = engineerDetails ? engineerDetails.level : "";
+        const level = c.level || "";
         const caseType = c.isCar ? "CAR" : "Regular";
 
-        // ✅ Force Case ID as TEXT
+        // Force Case ID as TEXT so Excel doesn't convert it
         csvContent += `="${c.caseId}",${c.engineer},${level},${c.region},${c.severity},"${c.time}",${caseType}\n`;
     });
 
