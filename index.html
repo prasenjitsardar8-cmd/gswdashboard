@@ -640,24 +640,30 @@ function toggleStatus(name, type, duration = null){
             delete engineerStatus[name];
         } else {
             engineerStatus[name] = {
+                engineer: name,
                 type: "oncall",
-                since: now
+                since: now,
+                duration: null
             };
         }
 
     }
 
-if(type === "onbreak"){
+    if(type === "onbreak"){
 
-    if(duration === null){
-        delete engineerStatus[name];
-    } else {
-        engineerStatus[name] = {
-            type: "onbreak",
-            duration: duration,
-            since: now
-        };
+        if(duration === null){
+            delete engineerStatus[name];
+        } else {
+            engineerStatus[name] = {
+                engineer: name,
+                type: "onbreak",
+                since: now,
+                duration: duration
+            };
+        }
     }
+
+    db.ref("engineerStatus").set(engineerStatus);
 }
 
     db.ref("engineerStatus").set(engineerStatus);
