@@ -588,32 +588,37 @@ updateISTClock();
 let lastResetDate = localStorage.getItem("lastResetDate") || null;
 
 function checkDailyReset(){
+
     const now = new Date();
+
     const istTime = new Date(
         now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
     );
 
-    const hours = istTime.getHours();
-    const minutes = istTime.getMinutes();
     const todayDate = istTime.toISOString().split("T")[0];
 
-    // If 6:00 AM IST and not already reset today
-    if(hours === 6 && minutes === 0 && lastResetDate !== todayDate){
-        
-        // Clear all cases
-cases = [];
-db.ref("cases").set([]);
+    const sixAM = new Date(istTime);
+    sixAM.setHours(6,0,0,0);
 
-        // Mark reset done for today
+    // If current time is AFTER 6:00 AM IST
+    // and reset not done today
+    if(istTime >= sixAM && lastResetDate !== todayDate){
+
+        // Reset everything you want
+        db.ref("cases").set([]);
+
         lastResetDate = todayDate;
         localStorage.setItem("lastResetDate", todayDate);
 
-        alert("✅ Dashboard counters reset for new day (6:00 AM IST)");
+        console.log("✅ Auto reset executed at 6AM IST");
     }
 }
 
-// Check every 30 seconds
-setInterval(checkDailyReset, 30000);
+// Check every minute (safer)
+setInterval(checkDailyReset, 60000);
+
+// Run once on page load
+checkDailyReset();
 
 /* ===== MASTER ENGINEERS ===== */
 const masterEngineers = [
