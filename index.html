@@ -648,7 +648,7 @@ const masterEngineers = [
 {level:"L1", name:"Anubhav", shift:"9:00 PM - 6:00 AM", region:"AMS"},
 {level:"L1", name:"Tanisha K", shift:"9:00 PM - 6:00 AM", region:"AMS"},
 {level:"L1", name:"Suraj", shift:"9:00 PM - 6:00 AM", region:"AMS"},
-{level:"L2", name:"Prasenjit", shift:"1:30 PM - 10:30 PM", region:"AMS"},
+{level:"L2", name:"Prasenjit", shift:"8:00 PM - 10:30 PM", region:"AMS"},
 {level:"L2", name:"Isha", shift:"5:00 PM - 2:00 AM", region:"AMS"},
 {level:"L2", name:"Keith", shift:"9:00 PM - 6:00 AM", region:"AMS"}
 ];
@@ -673,28 +673,23 @@ function toggleStatus(name, type, duration = null){
                 since: now
             };
         }
-
     }
 
-if(type === "onbreak"){
+    if(type === "onbreak"){
 
-    if(duration === null){
-        delete engineerStatus[name];
-    } else {
-        engineerStatus[name] = {
-            type: "onbreak",
-            duration: duration,
-            since: now
-        };
+        if(duration === null){
+            delete engineerStatus[name];
+        } else {
+            engineerStatus[name] = {
+                type: "onbreak",
+                duration: duration,
+                since: now
+            };
+        }
     }
-}
 
-    db.ref("engineerStatus").set(
-  Object.keys(engineerStatus).map(name => ({
-    engineer: name,
-    ...engineerStatus[name]
-  }))
-);
+    // ✅ SAVE AS OBJECT (NOT ARRAY)
+    db.ref("engineerStatus").set(engineerStatus);
 }
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
