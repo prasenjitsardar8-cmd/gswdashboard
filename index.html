@@ -689,7 +689,12 @@ if(type === "onbreak"){
     }
 }
 
-    db.ref("engineerStatus").set(engineerStatus);
+    db.ref("engineerStatus").set(
+  Object.keys(engineerStatus).map(name => ({
+    engineer: name,
+    ...engineerStatus[name]
+  }))
+);
 }
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
