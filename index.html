@@ -889,11 +889,14 @@ function render(){
 
         // ===== CARD CLASS =====
         let cardClass = "engineer-card";
-        if(status?.type === "oncall") cardClass += " oncall";
-        if(status?.type === "onbreak") cardClass += " onbreak";
-        if(!isPresent) cardClass += " absent";
-        if(isPresent && hasSev1) cardClass += " red";
-        if(e.name === nextEngineer) cardClass += " next";
+// ===== CARD CLASS =====
+let cardClass = "engineer-card";
+
+if(status?.type === "oncall") cardClass += " oncall";
+if(status?.type === "onbreak") cardClass += " onbreak";
+if(!isPresent) cardClass += " absent";
+if(isPresent && hasSev1) cardClass += " red";
+if(e.name === nextEngineer) cardClass += " next";
 
         dashboard.innerHTML += `
         <div class="flip-card ${cardClass}">
