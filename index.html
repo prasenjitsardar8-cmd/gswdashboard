@@ -566,6 +566,19 @@ db.ref("engineerStatus").on("value", (snapshot) => {
     render();
 });
 
+db.ref("presentEngineers").on("value", (snapshot) => {
+
+    const data = snapshot.val();
+
+    if (!data) {
+        presentEngineers = [];
+    } else {
+        presentEngineers = data;
+    }
+
+    render();
+});
+
 
 function updateISTClock(){
 
