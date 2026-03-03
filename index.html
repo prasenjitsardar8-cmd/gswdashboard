@@ -531,18 +531,38 @@ let presentEngineers = [];
 let cases = [];
 let engineerStatus = {};
 
-db.ref("presentEngineers").on("value", (snapshot) => {
-    presentEngineers = snapshot.val() || [];
-    render();
-});
-
 db.ref("engineerStatus").on("value", (snapshot) => {
-    engineerStatus = snapshot.val() || {};
-    render();
-});
 
-db.ref("cases").on("value", (snapshot) => {
-    cases = snapshot.val() || [];
+    const data = snapshot.val();
+
+    engineerStatus = {};
+
+    if (!data) {
+        render();
+        return;
+    }
+
+    // 🔹 If already array (new format)
+    if (Array.isArray(data)) {
+        data.forEach(item => {
+            engineerStatus[item.Engineer] = {
+                type: item.type,
+                since: item.since,
+                duration: item.duration
+            };
+        });
+    }
+    // 🔹 If old object format (convert automatically)
+    else {
+        Object.keys(data).forEach(name => {
+            engineerStatus[name] = {
+                type: data[name].type,
+                since: data[name].since,
+                duration: data[name].duration ?? null
+            };
+        });
+    }
+
     render();
 });
 
@@ -1143,7 +1163,7 @@ function resetAllData(){
     // Reset each Firebase node separately
     db.ref("cases").set([]);
     db.ref("presentEngineers").set([]);
-    db.ref("engineerStatus").set({});
+    db.ref("engineerStatus").set([]);
 
     alert("Dashboard fully reset.");
 }
