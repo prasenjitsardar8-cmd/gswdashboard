@@ -579,6 +579,20 @@ db.ref("presentEngineers").on("value", (snapshot) => {
     render();
 });
 
+// ✅ ADD THIS HERE
+db.ref("cases").on("value", (snapshot) => {
+
+    const data = snapshot.val();
+
+    if (!data) {
+        cases = [];
+    } else {
+        cases = data;
+    }
+
+    render();
+});
+
 
 function updateISTClock(){
 
