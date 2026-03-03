@@ -688,8 +688,16 @@ function toggleStatus(name, type, duration = null){
         }
     }
 
-    // ✅ SAVE AS OBJECT (NOT ARRAY)
-    db.ref("engineerStatus").set(engineerStatus);
+// ✅ Convert object to array before saving
+const statusArray = Object.keys(engineerStatus).map(name => ({
+    Engineer: name,
+    type: engineerStatus[name]?.type || "",
+    since: engineerStatus[name]?.since || "",
+    duration: engineerStatus[name]?.duration ?? null
+}));
+
+db.ref("engineerStatus").set(statusArray);
+
 }
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
