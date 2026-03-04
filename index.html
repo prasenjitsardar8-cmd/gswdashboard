@@ -547,7 +547,7 @@ db.ref("engineerStatus").on("value", (snapshot) => {
         data.forEach(item => {
             engineerStatus[item.Engineer] = {
                 type: item.type,
-                since: item.since,
+                startTime: item.startTime,
                 duration: item.duration
             };
         });
@@ -694,80 +694,88 @@ const masterEngineers = [
 {level:"L1", name:"Anubhav", shift:"9:00 PM - 6:00 AM", region:"AMS"},
 {level:"L1", name:"Tanisha K", shift:"9:00 PM - 6:00 AM", region:"AMS"},
 {level:"L1", name:"Suraj", shift:"9:00 PM - 6:00 AM", region:"AMS"},
-{level:"L2", name:"Prasenjit", shift:"8:00 PM - 10:30 PM", region:"AMS"},
+{level:"L2", name:"Prasenjit", shift:"8:00 AM - 5:00 PM", region:"AMS"},
 {level:"L2", name:"Isha", shift:"5:00 PM - 2:00 AM", region:"AMS"},
 {level:"L2", name:"Keith", shift:"9:00 PM - 6:00 AM", region:"AMS"}
 ];
 
+/* ===== TIME FUNCTIONS ===== */
+
+function getISTTime(){
+
+    return new Date().toLocaleTimeString("en-IN",{
+        timeZone:"Asia/Kolkata",
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+        hour12:false
+    });
+
+}
+
+function calculateDuration(start, end){
+
+    const startParts = start.split(":").map(Number);
+    const endParts = end.split(":").map(Number);
+
+    const startSeconds = startParts[0]*3600 + startParts[1]*60 + startParts[2];
+    const endSeconds = endParts[0]*3600 + endParts[1]*60 + endParts[2];
+
+    const diff = endSeconds - startSeconds;
+
+    const hours = Math.floor(diff/3600);
+    const mins = Math.floor((diff%3600)/60);
+    const secs = diff%60;
+
+    return `${hours}h ${mins}m ${secs}s`;
+}
 
 function toggleStatus(name, type, duration = null){
 
-    const now = new Date().toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-    }) + " IST";
+    const now = getISTTime();
 
     // ===== TURN OFF STATUS =====
-    if(type === "oncall" && engineerStatus[name]?.type === "oncall"){
+    if(engineerStatus[name] && engineerStatus[name].type === type){
 
-        const ended = now;
+        const startTime = engineerStatus[name].startTime;
+        const endTime = now;
 
-        // Save history
+        const durationValue = calculateDuration(startTime, endTime);
+
+        // Save completed status to Firebase history
         db.ref("statusHistory").push({
             Engineer: name,
-            type: "oncall",
-            since: engineerStatus[name].since,
-            ended: ended
-        });
-
-        delete engineerStatus[name];
-    }
-
-    else if(type === "onbreak" && duration === null){
-
-        const ended = now;
-
-        db.ref("statusHistory").push({
-            Engineer: name,
-            type: "onbreak",
-            duration: engineerStatus[name]?.duration || null,
-            since: engineerStatus[name]?.since || "",
-            ended: ended
+            type: type,
+            startTime: startTime,
+            endTime: endTime,
+            duration: durationValue
         });
 
         delete engineerStatus[name];
     }
 
     // ===== TURN ON STATUS =====
-    else if(type === "oncall"){
+    else{
 
         engineerStatus[name] = {
-            type: "oncall",
-            since: now
+            type: type,
+            startTime: now,
+            duration: duration
         };
+
     }
 
-    else if(type === "onbreak"){
-
-        engineerStatus[name] = {
-            type: "onbreak",
-            duration: duration,
-            since: now
-        };
-    }
-
+    // Convert object → array before saving to Firebase
     const statusArray = Object.keys(engineerStatus).map(name => ({
         Engineer: name,
-        type: engineerStatus[name]?.type || "",
-        since: engineerStatus[name]?.since || "",
+        type: engineerStatus[name].type,
+        startTime: engineerStatus[name].startTime,
         duration: engineerStatus[name]?.duration ?? null
     }));
 
     db.ref("engineerStatus").set(statusArray);
 }
+
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
 
@@ -991,7 +999,7 @@ if(e.name === nextEngineer) cardClass += " next";
                         ? `<div class="oncall-badge" style="margin-bottom:6px;">
                             📞 On Call 
                             <small style="margin-left:6px;font-weight:400;">
-                                since ${status.since}
+                                since ${status.startTime}
                             </small>
                            </div>`
                         : ''
@@ -1001,7 +1009,7 @@ if(e.name === nextEngineer) cardClass += " next";
                         ? `<div class="onbreak-badge" style="margin-bottom:6px;">
                             ☕ On Break (${status.duration} mins)
                             <small style="margin-left:6px;font-weight:400;">
-                                since ${status.since}
+                                since ${status.startTime}
                             </small>
                            </div>`
                         : ''
@@ -1035,7 +1043,7 @@ if(e.name === nextEngineer) cardClass += " next";
                                 ${status.type === "oncall" 
                                     ? "📞 On Call since " 
                                     : `☕ On Break (${status.duration} mins) since `}
-                                ${status.since}
+                                ${status.startTime}
                             </div>
                         ` : ""}
 
