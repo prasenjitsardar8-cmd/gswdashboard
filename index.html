@@ -730,6 +730,26 @@ function calculateDuration(start, end){
     return `${hours}h ${mins}m ${secs}s`;
 }
 
+function getLiveDuration(startTime){
+
+    const now = getISTTime();
+
+    const startParts = startTime.split(":").map(Number);
+    const nowParts = now.split(":").map(Number);
+
+    const startSeconds = startParts[0]*3600 + startParts[1]*60 + startParts[2];
+    const nowSeconds = nowParts[0]*3600 + nowParts[1]*60 + nowParts[2];
+
+    let diff = nowSeconds - startSeconds;
+    if(diff < 0) diff += 86400;
+
+    const mins = Math.floor(diff/60);
+    const secs = diff % 60;
+
+    return `${mins}m ${secs}s`;
+}
+setInterval(render,1000);
+
 function toggleStatus(name, type, duration = null){
 
     const now = getISTTime();
@@ -997,20 +1017,14 @@ if(e.name === nextEngineer) cardClass += " next";
 
                     ${status?.type === "oncall" 
                         ? `<div class="oncall-badge" style="margin-bottom:6px;">
-                            📞 On Call 
-                            <small style="margin-left:6px;font-weight:400;">
-                                since ${status.startTime}
-                            </small>
+📞 On Call • ${getLiveDuration(status.startTime)}
                            </div>`
                         : ''
                     }
 
                     ${status?.type === "onbreak" 
                         ? `<div class="onbreak-badge" style="margin-bottom:6px;">
-                            ☕ On Break (${status.duration} mins)
-                            <small style="margin-left:6px;font-weight:400;">
-                                since ${status.startTime}
-                            </small>
+☕ On Break • ${getLiveDuration(status.startTime)}
                            </div>`
                         : ''
                     }
@@ -1040,10 +1054,10 @@ if(e.name === nextEngineer) cardClass += " next";
                                 font-weight:500;
                                 text-align:center;
                             ">
-                                ${status.type === "oncall" 
-                                    ? "📞 On Call since " 
-                                    : `☕ On Break (${status.duration} mins) since `}
-                                ${status.startTime}
+${status.type === "oncall"
+    ? `📞 On Call • ${getLiveDuration(status.startTime)}`
+    : `☕ On Break • ${getLiveDuration(status.startTime)}`
+}
                             </div>
                         ` : ""}
 
