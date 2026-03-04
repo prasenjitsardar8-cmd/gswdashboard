@@ -707,68 +707,43 @@ function toggleStatus(name, type, duration = null){
         timeZone: "Asia/Kolkata",
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
         hour12: false
     }) + " IST";
 
-    // ===== TURN OFF STATUS =====
-    if(type === "oncall" && engineerStatus[name]?.type === "oncall"){
+    if(type === "oncall"){
 
-        const ended = now;
-
-        // Save history
-        db.ref("statusHistory").push({
-            Engineer: name,
-            type: "oncall",
-            since: engineerStatus[name].since,
-            ended: ended
-        });
-
-        delete engineerStatus[name];
+        if(engineerStatus[name]?.type === "oncall"){
+            delete engineerStatus[name];
+        } else {
+            engineerStatus[name] = {
+                type: "oncall",
+                since: now
+            };
+        }
     }
 
-    else if(type === "onbreak" && duration === null){
+    if(type === "onbreak"){
 
-        const ended = now;
-
-        db.ref("statusHistory").push({
-            Engineer: name,
-            type: "onbreak",
-            duration: engineerStatus[name]?.duration || null,
-            since: engineerStatus[name]?.since || "",
-            ended: ended
-        });
-
-        delete engineerStatus[name];
+        if(duration === null){
+            delete engineerStatus[name];
+        } else {
+            engineerStatus[name] = {
+                type: "onbreak",
+                duration: duration,
+                since: now
+            };
+        }
     }
 
-    // ===== TURN ON STATUS =====
-    else if(type === "oncall"){
+// ✅ Convert object to array before saving
+const statusArray = Object.keys(engineerStatus).map(name => ({
+    Engineer: name,
+    type: engineerStatus[name]?.type || "",
+    since: engineerStatus[name]?.since || "",
+    duration: engineerStatus[name]?.duration ?? null
+}));
 
-        engineerStatus[name] = {
-            type: "oncall",
-            since: now
-        };
-    }
-
-    else if(type === "onbreak"){
-
-        engineerStatus[name] = {
-            type: "onbreak",
-            duration: duration,
-            since: now
-        };
-    }
-
-    const statusArray = Object.keys(engineerStatus).map(name => ({
-        Engineer: name,
-        type: engineerStatus[name]?.type || "",
-        since: engineerStatus[name]?.since || "",
-        duration: engineerStatus[name]?.duration ?? null
-    }));
-
-    db.ref("engineerStatus").set(statusArray);
-}
+db.ref("engineerStatus").set(statusArray);
 
 }
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
