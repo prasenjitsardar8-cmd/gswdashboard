@@ -1002,7 +1002,9 @@ function render(){
 
     masterEngineers.forEach(e => {
 
-        if(levelFilter !== "ALL" && e.level !== levelFilter) return;
+       if(levelFilter !== "ALL" && e.level !== levelFilter) return;
+
+// Always render the card even if not present
 
         const isPresent = presentEngineers.includes(e.name);
         const engCases = cases.filter(c => c.engineer === e.name);
