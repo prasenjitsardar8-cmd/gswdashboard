@@ -199,7 +199,7 @@ button:hover{
     perspective:1000px;
 }
 
-.flip-card:hover .flip-inner{
+.flip-card.flipped .flip-inner{
     transform: rotateY(180deg);
 }
 
@@ -748,7 +748,18 @@ function getLiveDuration(startTime){
 
     return `${mins}m ${secs}s`;
 }
-setInterval(render,1000);
+setInterval(updateDurations,1000);
+
+function updateDurations(){
+
+    document.querySelectorAll("[data-start]").forEach(el => {
+
+        const start = el.getAttribute("data-start");
+        el.innerText = getLiveDuration(start);
+
+    });
+
+}
 
 function toggleStatus(name, type, duration = null){
 
@@ -1002,7 +1013,10 @@ if(isPresent && hasSev1) cardClass += " red";
 if(e.name === nextEngineer) cardClass += " next";
 
         dashboard.innerHTML += `
-        <div class="flip-card ${cardClass}">
+<div class="flip-card ${cardClass}"
+     onmouseenter="flipCard(this)"
+     onmouseleave="unflipCard(this)"
+     onclick="toggleFlip(event,this)">
             <div class="flip-inner">
 
                 <!-- FRONT -->
@@ -1017,14 +1031,18 @@ if(e.name === nextEngineer) cardClass += " next";
 
                     ${status?.type === "oncall" 
                         ? `<div class="oncall-badge" style="margin-bottom:6px;">
-📞 On Call • ${getLiveDuration(status.startTime)}
+📞 On Call • <span data-start="${status.startTime}">
+${getLiveDuration(status.startTime)}
+</span>
                            </div>`
                         : ''
                     }
 
                     ${status?.type === "onbreak" 
                         ? `<div class="onbreak-badge" style="margin-bottom:6px;">
-☕ On Break • ${getLiveDuration(status.startTime)}
+☕ On Break • <span data-start="${status.startTime}">
+${getLiveDuration(status.startTime)}
+</span>
                            </div>`
                         : ''
                     }
@@ -1187,6 +1205,26 @@ ${status.type === "oncall"
 
     populateDropdowns();
 }
+
+function flipCard(card){
+    card.classList.add("flipped");
+}
+
+function unflipCard(card){
+    card.classList.remove("flipped");
+}
+
+function toggleFlip(e, card){
+
+    const tag = e.target.tagName;
+
+    if(tag === "INPUT" || tag === "SELECT" || tag === "BUTTON"){
+        return;
+    }
+
+    card.classList.toggle("flipped");
+}
+
 /* ===== EXPORT TO EXCEL (UPDATED WITH CASE TYPE) ===== */
 function exportToExcel(){
 
