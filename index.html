@@ -553,15 +553,15 @@ db.ref("engineerStatus").on("value", (snapshot) => {
         });
     }
     // 🔹 If old object format (convert automatically)
-    else {
-        Object.keys(data).forEach(name => {
-            engineerStatus[name] = {
-                type: data[name].type,
-                since: data[name].since,
-                duration: data[name].duration ?? null
-            };
-        });
-    }
+else {
+    Object.keys(data).forEach(name => {
+        engineerStatus[name] = {
+            type: data[name].type,
+            startTime: data[name].startTime || data[name].since,
+            duration: data[name].duration ?? null
+        };
+    });
+}
 
     render();
 });
@@ -642,7 +642,7 @@ function checkDailyReset(){
         now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
     );
 
-    const todayDate = istTime.toISOString().split("T")[0];
+const todayDate = istTime.toLocaleDateString("en-CA");
 
     const sixAM = new Date(istTime);
     sixAM.setHours(6,0,0,0);
@@ -652,7 +652,8 @@ function checkDailyReset(){
     if(istTime >= sixAM && lastResetDate !== todayDate){
 
         // Reset everything you want
-        db.ref("cases").set([]);
+db.ref("cases").set([]);
+db.ref("engineerStatus").set([]);
 
         lastResetDate = todayDate;
         localStorage.setItem("lastResetDate", todayDate);
@@ -721,7 +722,8 @@ function calculateDuration(start, end){
     const startSeconds = startParts[0]*3600 + startParts[1]*60 + startParts[2];
     const endSeconds = endParts[0]*3600 + endParts[1]*60 + endParts[2];
 
-    const diff = endSeconds - startSeconds;
+    let diff = endSeconds - startSeconds;
+    if(diff < 0) diff += 86400;
 
     const hours = Math.floor(diff/3600);
     const mins = Math.floor((diff%3600)/60);
@@ -752,11 +754,12 @@ setInterval(updateDurations,1000);
 
 function updateDurations(){
 
-    document.querySelectorAll("[data-start]").forEach(el => {
+    const elements = document.querySelectorAll("[data-start]");
+    if(elements.length === 0) return;
 
+    elements.forEach(el=>{
         const start = el.getAttribute("data-start");
         el.innerText = getLiveDuration(start);
-
     });
 
 }
@@ -765,7 +768,7 @@ function toggleStatus(name, type, duration = null){
 
     const now = getISTTime();
 
-    // ===== END CURRENT STATUS =====
+    // ===== IF SAME STATUS CLICKED AGAIN → END STATUS =====
     if(engineerStatus[name] && engineerStatus[name].type === type){
 
         const startTime = engineerStatus[name].startTime;
@@ -773,8 +776,9 @@ function toggleStatus(name, type, duration = null){
 
         const durationValue = calculateDuration(startTime, endTime);
 
-        // Save full history
-        db.ref("statusHistory").push({
+        const today = new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"});
+
+        db.ref("statusHistory/" + today).push({
             Engineer: name,
             type: type,
             startTime: startTime,
@@ -785,25 +789,44 @@ function toggleStatus(name, type, duration = null){
         delete engineerStatus[name];
     }
 
-    // ===== START NEW STATUS =====
+    // ===== DIFFERENT STATUS → CLOSE OLD THEN START NEW =====
     else{
+
+        if(engineerStatus[name]){
+
+            const prevType = engineerStatus[name].type;
+            const startTime = engineerStatus[name].startTime;
+
+            const durationValue = calculateDuration(startTime, now);
+
+            const today = new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"});
+
+            db.ref("statusHistory/" + today).push({
+                Engineer: name,
+                type: prevType,
+                startTime: startTime,
+                endTime: now,
+                duration: durationValue
+            });
+        }
 
         engineerStatus[name] = {
             type: type,
-            startTime: now
+            startTime: now,
+            duration: duration
         };
-
     }
 
-    // Convert to array for Firebase
     const statusArray = Object.keys(engineerStatus).map(name => ({
         Engineer: name,
         type: engineerStatus[name].type,
-        startTime: engineerStatus[name].startTime
+        startTime: engineerStatus[name].startTime,
+        duration: engineerStatus[name].duration ?? null
     }));
 
     db.ref("engineerStatus").set(statusArray);
 }
+
 
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
