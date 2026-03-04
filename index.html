@@ -1041,7 +1041,7 @@ if(isPresent && hasSev1) cardClass += " red";
 if(e.name === nextEngineer) cardClass += " next";
 
         dashboard.innerHTML += `
-<div class="flip-card ${cardClass}"
+<div class="${cardClass} flip-card"
      onmouseenter="flipCard(this)"
      onmouseleave="unflipCard(this)"
      onclick="toggleFlip(event,this)">
