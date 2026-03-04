@@ -194,6 +194,18 @@ button:hover{
     gap:14px;
 }
 
+/* ===== ABSENT ENGINEER ROW ===== */
+
+/* Small collapsed card */
+
+/* Not present badge smaller */
+.absent-card span{
+    background:rgba(255,255,255,0.2);
+    padding:2px 6px;
+    border-radius:4px;
+    font-size:10px;
+}
+
 /* ===== FLIP CARD SYSTEM ===== */
 .flip-card{
     perspective:1000px;
@@ -335,6 +347,12 @@ button:hover{
     border:1px solid #dc2626;
 }
 
+/* ===== L2 ENGINEER CARD ===== */
+.engineer-card.l2 .flip-front{
+    border:2px solid #7c3aed;     /* Purple border */
+    box-shadow:0 0 6px rgba(124,58,237,0.25);
+}
+
 /* ===== ABSENT ENGINEER FULL GREY CARD ===== */
 .engineer-card.absent .flip-front,
 .engineer-card.absent .flip-back{
@@ -364,14 +382,14 @@ button:hover{
     position:absolute;
     top:10px;
     right:10px;
-    background:#dc2626;          /* Red */
+    background:rgba(55,65,81,0.25);   /* Dark grey with 75% transparency */
     color:white;
     padding:4px 10px;
     font-size:10px;
     border-radius:6px;
     font-weight:700;
     letter-spacing:0.4px;
-    box-shadow:0 2px 6px rgba(220,38,38,0.3);
+    backdrop-filter:blur(3px);        /* optional glass effect */
 }
 
 /* ===== BADGES ===== */
@@ -384,6 +402,30 @@ button:hover{
     padding:3px 7px;
     font-size:11px;
     border-radius:5px;
+}
+
+/* ===== L2 BADGE ===== */
+.l2-badge{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:#7c3aed;   /* Purple */
+    color:white;
+    padding:3px 7px;
+    font-size:11px;
+    border-radius:5px;
+    font-weight:600;
+}
+
+/* ===== L2 LABEL ===== */
+.l2-label{
+    margin-left:6px;
+    background:#7c3aed;
+    color:white;
+    font-size:10px;
+    padding:2px 6px;
+    border-radius:4px;
+    font-weight:600;
 }
 
 /* ===== CASE STYLING ===== */
@@ -505,6 +547,7 @@ button:hover{
 </div>
 
 <div class="dashboard" id="dashboard"></div>
+
 
 </div>
 
@@ -958,7 +1001,6 @@ function populateDropdowns(){
 
     const masterDD = document.getElementById("addPresentDropdown");
     const assignDD = document.getElementById("assignEngineer");
-
     const levelFilter = document.getElementById("levelFilter").value;
     const regionSelected = document.getElementById("region").value;
     const nextEngineer = getNextRecommended(regionSelected, levelFilter);
@@ -1018,11 +1060,10 @@ masterEngineers.forEach(e => {
     // Apply level filter
     if(levelFilter !== "ALL" && e.level !== levelFilter) return;
 
-    // Always render engineer cards
-
-// Always render the card even if not present
-
         const isPresent = Array.isArray(presentEngineers) && presentEngineers.includes(e.name);
+
+if(!isPresent) return;
+
         const engCases = cases.filter(c => c.engineer === e.name);
         const normalCases = engCases.filter(c => !c.isCar);
         const carCases = engCases.filter(c => c.isCar);
@@ -1052,6 +1093,8 @@ masterEngineers.forEach(e => {
 // ===== CARD CLASS =====
 let cardClass = "engineer-card";
 
+if(e.level === "L2") cardClass += " l2";
+
 if(status?.type === "oncall") cardClass += " oncall";
 if(status?.type === "onbreak") cardClass += " onbreak";
 if(!isPresent) cardClass += " absent";
@@ -1073,7 +1116,10 @@ if(e.name === nextEngineer) cardClass += " next";
                         : (hasSev1 ? '<div class="badge">SEV-1 ACTIVE</div>' : '')
                     }
 
-                    <h3>${e.name}</h3>
+                    <h3>
+${e.name}
+${e.level === "L2" ? '<span class="l2-label">L2</span>' : ''}
+</h3>
 
                     ${status?.type === "oncall" 
                         ? `<div class="oncall-badge" style="margin-bottom:6px;">
@@ -1337,5 +1383,4 @@ render();
 
 </script>
 </body>
-
 
