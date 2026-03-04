@@ -765,7 +765,7 @@ function toggleStatus(name, type, duration = null){
 
     const now = getISTTime();
 
-    // ===== TURN OFF STATUS =====
+    // ===== END CURRENT STATUS =====
     if(engineerStatus[name] && engineerStatus[name].type === type){
 
         const startTime = engineerStatus[name].startTime;
@@ -773,7 +773,7 @@ function toggleStatus(name, type, duration = null){
 
         const durationValue = calculateDuration(startTime, endTime);
 
-        // Save completed status to Firebase history
+        // Save full history
         db.ref("statusHistory").push({
             Engineer: name,
             type: type,
@@ -785,23 +785,21 @@ function toggleStatus(name, type, duration = null){
         delete engineerStatus[name];
     }
 
-    // ===== TURN ON STATUS =====
+    // ===== START NEW STATUS =====
     else{
 
         engineerStatus[name] = {
             type: type,
-            startTime: now,
-            duration: duration
+            startTime: now
         };
 
     }
 
-    // Convert object → array before saving to Firebase
+    // Convert to array for Firebase
     const statusArray = Object.keys(engineerStatus).map(name => ({
         Engineer: name,
         type: engineerStatus[name].type,
-        startTime: engineerStatus[name].startTime,
-        duration: engineerStatus[name]?.duration ?? null
+        startTime: engineerStatus[name].startTime
     }));
 
     db.ref("engineerStatus").set(statusArray);
