@@ -17,6 +17,10 @@ body {
     color:#1e293b;
 }
 
+html, body{
+    height:90%;
+}
+
 /* ===== SIDEBAR ===== */
 .sidebar{
     width:260px;
@@ -114,6 +118,7 @@ body {
     to{ box-shadow:0 0 18px rgba(22,163,74,0.7); }
 }
 
+
 /* ===== MAIN ===== */
 .main{
     flex:1;
@@ -129,14 +134,15 @@ h1{
 /* ===== TOP BANNER ===== */
 .top-banner{
     display:flex;
+    justify-content:center;
     align-items:center;
-    gap:30px;
-    background:white;
-    padding:14px 18px;
-    border-radius:10px;
-    margin-bottom:18px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
-    flex-wrap:nowrap;      /* Prevent wrapping */
+    gap:25px;
+    background:#111827;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:500;
 }
 
 /* Make everything inline */
@@ -190,9 +196,25 @@ button:hover{
 /* ===== DASHBOARD GRID ===== */
 .dashboard{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
     gap:14px;
+    width:100%;
 }
+/* ===== BOTTOM SUMMARY BAR ===== */
+.bottom-summary{
+    margin:12px 0 20px 0;
+    padding:10px 14px;
+    background:#111827;
+    color:white;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:500;
+    display:flex;
+    justify-content:center;
+    gap:25px;
+    flex-wrap:wrap;
+}
+
 
 /* ===== ABSENT ENGINEER ROW ===== */
 
@@ -507,7 +529,12 @@ button:hover{
     <span id="amsCount">AMS: 0</span>
     <span id="apjCount">APJ: 0</span>
     <span id="emeaCount">EMEA: 0</span>
-    <div id="istClock" class="ist-clock" style="margin-left:auto;"></div>
+<div id="istClock" class="ist-clock"></div>
+
+</div>
+
+<div class="bottom-summary" id="bottomSummary">
+Present: 0 | AMS: 0 | APJ: 0 | EMEA: 0 | On Break: 0 | On Call: 0
 </div>
 
 <div class="controls">
@@ -547,7 +574,6 @@ button:hover{
 </div>
 
 <div class="dashboard" id="dashboard"></div>
-
 
 </div>
 
@@ -1053,7 +1079,12 @@ function render(){
     dashboard.innerHTML = "";
     presentList.innerHTML = "";
 
-    let sev1 = 0, ams = 0, apj = 0, emea = 0;
+let sev1 = 0;
+let ams = 0, apj = 0, emea = 0;
+let presentCount = 0;
+let onBreakCount = 0;
+let onCallCount = 0;
+let availableCount = 0;
 
 masterEngineers.forEach(e => {
 
@@ -1069,13 +1100,6 @@ if(!isPresent) return;
         const carCases = engCases.filter(c => c.isCar);
         const hasSev1 = engCases.some(c => c.severity === "SEV-1");
         const status = engineerStatus[e.name];
-
-        engCases.forEach(c => {
-            if(c.severity === "SEV-1") sev1++;
-            if(c.region === "AMS") ams++;
-            if(c.region === "APJ") apj++;
-            if(c.region === "EMEA") emea++;
-        });
 
         // ===== SIDEBAR =====
         if(isPresent){
@@ -1100,6 +1124,22 @@ if(status?.type === "onbreak") cardClass += " onbreak";
 if(!isPresent) cardClass += " absent";
 if(isPresent && hasSev1) cardClass += " red";
 if(e.name === nextEngineer) cardClass += " next";
+
+if(e.region === "AMS") ams++;
+if(e.region === "APJ") apj++;
+if(e.region === "EMEA") emea++;
+
+if(isPresent) presentCount++;
+
+if(status?.type === "onbreak"){
+    onBreakCount++;
+}
+else if(status?.type === "oncall"){
+    onCallCount++;
+}
+else{
+    availableCount++;
+}
 
         dashboard.innerHTML += `
 <div class="${cardClass} flip-card"
@@ -1294,6 +1334,15 @@ ${status.type === "oncall"
     document.getElementById("amsCount").textContent = "AMS: " + ams;
     document.getElementById("apjCount").textContent = "APJ: " + apj;
     document.getElementById("emeaCount").textContent = "EMEA: " + emea;
+
+document.getElementById("bottomSummary").innerHTML = `
+Present: ${presentCount}
+&nbsp; | &nbsp; AMS: ${ams}
+&nbsp; | &nbsp; APJ: ${apj}
+&nbsp; | &nbsp; EMEA: ${emea}
+&nbsp; | &nbsp; On Break: ${onBreakCount}
+&nbsp; | &nbsp; On Call: ${onCallCount}
+`;
 
     populateDropdowns();
 }
