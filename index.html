@@ -280,6 +280,13 @@ button:hover{
     animation:onBreakGlow 2s ease-in-out infinite alternate;
 }
 
+/* ===== ON CALL STATE ===== */
+.engineer-card.oncall .flip-front{
+    background:#fff7ed;
+    border:2px solid #f97316;
+    animation:onCallGlow 2s ease-in-out infinite alternate;
+}
+
 @keyframes onBreakGlow{
     from{ box-shadow:0 0 6px rgba(2,132,199,0.35); }
     to{ box-shadow:0 0 18px rgba(2,132,199,0.7); }
@@ -1309,6 +1316,5 @@ function resetPresentEngineers(){
 
 </script>
 </body>
-
 
 
