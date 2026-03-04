@@ -542,23 +542,24 @@ db.ref("engineerStatus").on("value", (snapshot) => {
 
     const data = snapshot.val();
 
-    engineerStatus = {};
-
     if (!data) {
+        engineerStatus = {};
         render();
         return;
     }
 
+    engineerStatus = {};
+
     // 🔹 If already array (new format)
-    if (Array.isArray(data)) {
-        data.forEach(item => {
-            engineerStatus[item.Engineer] = {
-                type: item.type,
-                startTime: item.startTime,
-                duration: item.duration
-            };
-        });
-    }
+if (Array.isArray(data)) {
+    data.forEach(item => {
+        engineerStatus[item.Engineer] = {
+            type: item.type,
+            startTime: item.startTime || item.since,   // ⭐ FIX
+            duration: item.duration
+        };
+    });
+}
     // 🔹 If old object format (convert automatically)
 else {
     Object.keys(data).forEach(name => {
@@ -838,27 +839,39 @@ const statusArray = Object.keys(engineerStatus).map(name => ({
 /* ===== SMART NEXT ENGINEER (SKIP ON-CALL) ===== */
 function getNextRecommended(region, levelFilter){
 
-    const eligible = masterEngineers.filter(e =>
-        presentEngineers.includes(e.name) &&
-        !engineerStatus[e.name] &&   // ✅ skip anyone with status
-        e.region === region &&
-        (levelFilter === "ALL" || e.level === levelFilter)
-    );
+let eligible = masterEngineers.filter(e =>
+    (presentEngineers.length === 0 || presentEngineers.includes(e.name)) &&
+    !engineerStatus[e.name] &&
+    e.region === region
+);
 
-    if(eligible.length === 0) return null;
+// ===== LEVEL LOGIC =====
+if(levelFilter === "L1"){
+    eligible = eligible.filter(e => e.level === "L1");
+}
+else if(levelFilter === "L2"){
+    eligible = eligible.filter(e => e.level === "L2");
+}
+else{
+    // ALL → only L1 in round robin
+    eligible = eligible.filter(e => e.level === "L1");
+}
 
-    let minCases = Infinity;
-    let recommended = null;
+if(eligible.length === 0) return null;
 
-    eligible.forEach(e => {
-        const count = cases.filter(c => c.engineer === e.name).length;
-        if(count < minCases){
-            minCases = count;
-            recommended = e.name;
-        }
-    });
+let minCases = Infinity;
+let recommended = null;
 
-    return recommended;
+eligible.forEach(e => {
+    const count = cases.filter(c => c.engineer === e.name).length;
+
+    if(count < minCases){
+        minCases = count;
+        recommended = e.name;
+    }
+});
+
+return recommended;
 }
 
 function addCase(){
@@ -1009,7 +1022,7 @@ masterEngineers.forEach(e => {
 
 // Always render the card even if not present
 
-        const isPresent = presentEngineers.includes(e.name);
+        const isPresent = Array.isArray(presentEngineers) && presentEngineers.includes(e.name);
         const engCases = cases.filter(c => c.engineer === e.name);
         const normalCases = engCases.filter(c => !c.isCar);
         const carCases = engCases.filter(c => c.isCar);
@@ -1318,6 +1331,9 @@ function resetPresentEngineers(){
     db.ref("presentEngineers").set([]);
     alert("Present Engineers list has been reset.");
 }
+
+populateDropdowns();
+render();
 
 </script>
 </body>
