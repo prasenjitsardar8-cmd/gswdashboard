@@ -665,8 +665,13 @@ db.ref("cases").on("value", (snapshot) => {
 
     if (!data) {
         cases = [];
-    } else {
+    }
+    else if (Array.isArray(data)) {
         cases = data;
+    }
+    else {
+        // Convert Firebase object to array
+        cases = Object.values(data);
     }
 
     render();
@@ -1098,6 +1103,13 @@ masterEngineers.forEach(e => {
 if(!isPresent) return;
 
         const engCases = cases.filter(c => c.engineer === e.name);
+
+// Count SEV-1 cases
+engCases.forEach(c => {
+    if(c.severity === "SEV-1"){
+        sev1++;
+    }
+});
         const normalCases = engCases.filter(c => !c.isCar);
         const carCases = engCases.filter(c => c.isCar);
         const hasSev1 = engCases.some(c => c.severity === "SEV-1");
