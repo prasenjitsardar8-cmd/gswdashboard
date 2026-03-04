@@ -131,18 +131,18 @@ h1{
     margin-bottom:18px;
 }
 
-/* ===== TOP BANNER ===== */
 .top-banner{
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:25px;
+    gap:30px;
     background:#111827;
     color:white;
-    padding:10px 14px;
+    padding:12px 16px;
     border-radius:8px;
-    font-size:13px;
-    font-weight:500;
+    font-size:16px;      /* bigger text */
+    font-weight:700;     /* bold */
+    letter-spacing:0.4px;
 }
 
 /* Make everything inline */
@@ -202,16 +202,17 @@ button:hover{
 }
 /* ===== BOTTOM SUMMARY BAR ===== */
 .bottom-summary{
-    margin:12px 0 20px 0;
-    padding:10px 14px;
+    margin:10px 0 18px 0;
+    padding:12px 16px;
     background:#111827;
     color:white;
     border-radius:8px;
-    font-size:13px;
-    font-weight:500;
+    font-size:16px;      /* bigger text */
+    font-weight:700;     /* bold */
+    letter-spacing:0.4px;
     display:flex;
     justify-content:center;
-    gap:25px;
+    gap:30px;
     flex-wrap:wrap;
 }
 
@@ -489,11 +490,11 @@ button:hover{
 
 .dashboard-title{
     text-align:center;
-    font-size:22px;
-    font-weight:600;
+    font-size:26px;     /* larger */
+    font-weight:800;    /* extra bold */
     margin:0 auto 22px auto;
-    color:#000;           /* Black text */
-    letter-spacing:0.3px;
+    color:#000;
+    letter-spacing:0.4px;
 }
 
 </style>
@@ -1325,8 +1326,8 @@ ${status.type === "oncall"
         `;
     });
 
-    document.getElementById("sevCounter").textContent =
-        "SEV-1 Active: " + sev1;
+document.getElementById("sevCounter").textContent =
+    "Cases: SEV-1 Active: " + sev1;
 
     document.getElementById("sevCounter").className =
         "sev-counter " + (sev1 > 0 ? "sev-active" : "");
@@ -1336,7 +1337,7 @@ ${status.type === "oncall"
     document.getElementById("emeaCount").textContent = "EMEA: " + emea;
 
 document.getElementById("bottomSummary").innerHTML = `
-Present: ${presentCount}
+Engineers: Present: ${presentCount}
 &nbsp; | &nbsp; AMS: ${ams}
 &nbsp; | &nbsp; APJ: ${apj}
 &nbsp; | &nbsp; EMEA: ${emea}
