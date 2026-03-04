@@ -683,7 +683,7 @@ const masterEngineers = [
 {level:"L1", name:"Devyani", shift:"5:30 AM - 2:30 PM", region:"APJ"},
 {level:"L1", name:"Ashish", shift:"11:00 AM - 8:00 PM", region:"APJ"},
 {level:"L1", name:"Tanisha N", shift:"11:00 AM - 8:00 PM", region:"APJ"},
-{level:"L1", name:"Avinash", shift:"11:00 AM - 8:00 PM", region:"EMEA"},
+{level:"L1", name:"Avinash", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
 {level:"L1", name:"Vrushali", shift:"11:00 AM - 8:00 PM", region:"EMEA"},
 {level:"L1", name:"Yashaswini", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
 {level:"L1", name:"Avleen", shift:"11:00 AM - 8:00 PM", region:"EMEA"},
@@ -1000,9 +1000,12 @@ function render(){
 
     let sev1 = 0, ams = 0, apj = 0, emea = 0;
 
-    masterEngineers.forEach(e => {
+masterEngineers.forEach(e => {
 
-       if(levelFilter !== "ALL" && e.level !== levelFilter) return;
+    // Apply level filter
+    if(levelFilter !== "ALL" && e.level !== levelFilter) return;
+
+    // Always render engineer cards
 
 // Always render the card even if not present
 
@@ -1318,6 +1321,5 @@ function resetPresentEngineers(){
 
 </script>
 </body>
-
 
 
