@@ -817,12 +817,12 @@ function toggleStatus(name, type, duration = null){
         };
     }
 
-    const statusArray = Object.keys(engineerStatus).map(name => ({
-        Engineer: name,
-        type: engineerStatus[name].type,
-        startTime: engineerStatus[name].startTime,
-        duration: engineerStatus[name].duration ?? null
-    }));
+const statusArray = Object.keys(engineerStatus).map(name => ({
+    Engineer: name,
+    type: engineerStatus[name].type,
+    duration: engineerStatus[name].duration ?? null,
+    since: engineerStatus[name].startTime   // 👈 add this
+}));
 
     db.ref("engineerStatus").set(statusArray);
 }
