@@ -663,15 +663,13 @@ db.ref("cases").on("value", (snapshot) => {
 
     const data = snapshot.val();
 
-    if (!data) {
+    if(!data){
         cases = [];
-    }
-    else if (Array.isArray(data)) {
-        cases = data;
-    }
-    else {
-        // Convert Firebase object to array
-        cases = Object.values(data);
+    } else {
+        cases = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        }));
     }
 
     render();
@@ -943,8 +941,7 @@ function addCase(){
         time: new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
     };
 
-    cases.push(newCase);
-    db.ref("cases").set(cases);
+db.ref("cases").push(newCase);
 
     // Clear fields
     document.getElementById("caseId").value = "";
@@ -986,9 +983,11 @@ function deleteCase(caseId){
 
     if(!confirm("⚠ Remove case: "+caseId+" ?")) return;
 
-    cases = cases.filter(c=>c.caseId!==caseId);
+const caseToDelete = cases.find(c => c.caseId === caseId);
 
-    db.ref("cases").set(cases);
+if(caseToDelete){
+    db.ref("cases/" + caseToDelete.id).remove();
+}
 }
 
 function populateDropdowns(){
