@@ -941,7 +941,8 @@ function addCase(){
         time: new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"
     };
 
-db.ref("cases").push(newCase);
+cases.push(newCase);
+db.ref("cases").set(cases);
 
     // Clear fields
     document.getElementById("caseId").value = "";
@@ -1438,4 +1439,3 @@ render();
 
 </script>
 </body>
-
