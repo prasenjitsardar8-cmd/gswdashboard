@@ -1417,7 +1417,7 @@ function resetAllData(){
     presentEngineers = [];
     engineerStatus = {};
 
-    db.ref("cases").set([]);
+    db.ref("cases").remove();
     db.ref("presentEngineers").set([]);
     db.ref("engineerStatus").set([]);
 
