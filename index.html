@@ -1099,9 +1099,19 @@ if(!isPresent) cardClass += " absent";
 if(isPresent && hasSev1) cardClass += " red";
 if(e.name === nextEngineer) cardClass += " next";
 
-if(e.region === "AMS") ams++;
-if(e.region === "APJ") apj++;
-if(e.region === "EMEA") emea++;
+// Reset counters
+ams = 0;
+apj = 0;
+emea = 0;
+
+// Count cases per region
+cases.forEach(c => {
+
+    if(c.region === "AMS") ams++;
+    if(c.region === "APJ") apj++;
+    if(c.region === "EMEA") emea++;
+
+});
 
 if(isPresent) presentCount++;
 
