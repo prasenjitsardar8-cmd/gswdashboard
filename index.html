@@ -713,54 +713,15 @@ function updateISTClock(){
 setInterval(updateISTClock,1000);
 updateISTClock();
 
-
-/* ===== AUTO RESET AT 6:00 AM IST ===== */
-
-let lastResetDate = localStorage.getItem("lastResetDate") || null;
-
-function checkDailyReset(){
-
-    const now = new Date();
-
-    const istTime = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-    );
-
-const todayDate = istTime.toLocaleDateString("en-CA");
-
-    const sixAM = new Date(istTime);
-    sixAM.setHours(6,0,0,0);
-
-    // If current time is AFTER 6:00 AM IST
-    // and reset not done today
-    if(istTime >= sixAM && lastResetDate !== todayDate){
-
-        // Reset everything you want
-db.ref("cases").set([]);
-db.ref("engineerStatus").set([]);
-
-        lastResetDate = todayDate;
-        localStorage.setItem("lastResetDate", todayDate);
-
-        console.log("✅ Auto reset executed at 6AM IST");
-    }
-}
-
-// Check every minute (safer)
-setInterval(checkDailyReset, 60000);
-
-// Run once on page load
-checkDailyReset();
-
 /* ===== MASTER ENGINEERS ===== */
 const masterEngineers = [
 {level:"L1", name:"Aaditya", shift:"5:30 AM - 2:30 PM", region:"APJ"},
 {level:"L1", name:"Aayush", shift:"5:30 AM - 2:30 PM", region:"APJ"},
 {level:"L1", name:"Namneet", shift:"5:30 AM - 2:30 PM", region:"APJ"},
 {level:"L1", name:"Devyani", shift:"5:30 AM - 2:30 PM", region:"APJ"},
-{level:"L1", name:"Ashish", shift:"11:00 AM - 8:00 PM", region:"APJ"},
-{level:"L1", name:"Tanisha N", shift:"11:00 AM - 8:00 PM", region:"APJ"},
-{level:"L1", name:"Avinash", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
+{level:"L1", name:"Ashish", shift:"1:30 PM - 10:30 PM", region:"APJ"},
+{level:"L1", name:"Tanisha N", shift:"1:30 PM - 10:30 PM", region:"APJ"},
+{level:"L1", name:"Avinash", shift:"11:00 AM - 8:00 PM", region:"EMEA"},
 {level:"L1", name:"Vrushali", shift:"11:00 AM - 8:00 PM", region:"EMEA"},
 {level:"L1", name:"Yashaswini", shift:"1:30 PM - 10:30 PM", region:"EMEA"},
 {level:"L1", name:"Avleen", shift:"11:00 AM - 8:00 PM", region:"EMEA"},
@@ -1416,20 +1377,26 @@ function exportToExcel(){
 /* ===== RESET ALL DATA ===== */
 function resetAllData(){
 
-    if(!confirm("⚠ This will completely reset the dashboard. Continue?"))
+    if(!confirm("⚠ This will reset the dashboard but keep historical data. Continue?"))
         return;
 
-    // Clear local memory first
+    const today = new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"});
+
+    // Save old cases to history
+    db.ref("caseHistory/" + today).push({
+        cases: cases
+    });
+
+    // Reset dashboard only
     cases = [];
     presentEngineers = [];
     engineerStatus = {};
 
-    // Reset each Firebase node separately
     db.ref("cases").set([]);
     db.ref("presentEngineers").set([]);
     db.ref("engineerStatus").set([]);
 
-    alert("Dashboard fully reset.");
+    alert("Dashboard reset. Historical data preserved.");
 }
 
     /* ===== RESET ONLY PRESENT ENGINEERS ===== */
