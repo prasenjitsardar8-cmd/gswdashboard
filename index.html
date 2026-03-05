@@ -1047,11 +1047,32 @@ function render(){
     presentList.innerHTML = "";
 
 let sev1 = 0;
-let ams = 0, apj = 0, emea = 0;
+
+// CASE COUNTERS (top banner)
+let caseAMS = 0;
+let caseAPJ = 0;
+let caseEMEA = 0;
+
+// ENGINEER COUNTERS (bottom summary)
+let engAMS = 0;
+let engAPJ = 0;
+let engEMEA = 0;
+
 let presentCount = 0;
 let onBreakCount = 0;
 let onCallCount = 0;
 let availableCount = 0;
+
+// ===== COUNT CASES BY REGION =====
+cases.forEach(c => {
+
+    if(c.severity === "SEV-1") sev1++;
+
+    if(c.region === "AMS") caseAMS++;
+    if(c.region === "APJ") caseAPJ++;
+    if(c.region === "EMEA") caseEMEA++;
+
+});
 
 masterEngineers.forEach(e => {
 
@@ -1099,21 +1120,16 @@ if(!isPresent) cardClass += " absent";
 if(isPresent && hasSev1) cardClass += " red";
 if(e.name === nextEngineer) cardClass += " next";
 
-// Reset counters
-ams = 0;
-apj = 0;
-emea = 0;
 
-// Count cases per region
-cases.forEach(c => {
+if(isPresent){
 
-    if(c.region === "AMS") ams++;
-    if(c.region === "APJ") apj++;
-    if(c.region === "EMEA") emea++;
+    presentCount++;
 
-});
+    if(e.region === "AMS") engAMS++;
+    if(e.region === "APJ") engAPJ++;
+    if(e.region === "EMEA") engEMEA++;
 
-if(isPresent) presentCount++;
+}
 
 if(status?.type === "onbreak"){
     onBreakCount++;
@@ -1315,15 +1331,15 @@ document.getElementById("sevCounter").textContent =
     document.getElementById("sevCounter").className =
         "sev-counter " + (sev1 > 0 ? "sev-active" : "");
 
-    document.getElementById("amsCount").textContent = "AMS: " + ams;
-    document.getElementById("apjCount").textContent = "APJ: " + apj;
-    document.getElementById("emeaCount").textContent = "EMEA: " + emea;
+document.getElementById("amsCount").textContent = "AMS: " + caseAMS;
+document.getElementById("apjCount").textContent = "APJ: " + caseAPJ;
+document.getElementById("emeaCount").textContent = "EMEA: " + caseEMEA;
 
 document.getElementById("bottomSummary").innerHTML = `
 Engineers: Present: ${presentCount}
-&nbsp; | &nbsp; AMS: ${ams}
-&nbsp; | &nbsp; APJ: ${apj}
-&nbsp; | &nbsp; EMEA: ${emea}
+&nbsp; | &nbsp; AMS: ${engAMS}
+&nbsp; | &nbsp; APJ: ${engAPJ}
+&nbsp; | &nbsp; EMEA: ${engEMEA}
 &nbsp; | &nbsp; On Break: ${onBreakCount}
 &nbsp; | &nbsp; On Call: ${onCallCount}
 `;
